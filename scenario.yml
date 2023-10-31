@@ -1,0 +1,10 @@
+description: KubeCon + CloudNativeCon 2023 NA: Cloud Native Essentials - A 101 Tutorial to Start Your Cloud Native Journey 
+id: git-maintained-cloud-native-essentials
+keepalive_duration: 90m
+name: Cloud Native Essentials
+pause_duration: 4h
+pauseable: false
+steps: null
+virtualmachines:
+- harbor: ubuntu-22.04
+  kubernetes: ubuntu-22.04
