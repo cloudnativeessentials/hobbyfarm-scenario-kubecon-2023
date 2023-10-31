@@ -105,10 +105,10 @@ kube-prometheus-stack-prometheus-node-exporter   ClusterIP   10.97.91.228    <no
 prometheus-operated                              ClusterIP   None            <none>        9090/TCP                        11s
 ```
 
-6. To access Prometheus go to your node's IP on port 30090, [http://${vminfo:kubernetes:public_ip}.sslip.io:30090](http://${vminfo:kubernetes:public_ip}.sslip.io:30090)
+6. To access Prometheus go to your node's IP on port 30090, <a href="http://${vminfo:kubernetes:public_ip}.sslip.io:30090" target="_blank">http://${vminfo:kubernetes:public_ip}.sslip.io:30090</a>
 
-7. To access Grafana go to your node's IP on port 30140, [http://${vminfo:kubernetes:public_ip}.sslip.io:30140](http://${vminfo:kubernetes:public_ip}.sslip.io:30140) and use the default admin credentials: username = `admin`, password = `prom-operator`
-Checkout a dashboard like the Kubernetes/Kubelet dashboard
+7. To access Grafana go to your node's IP on port 30140, <a href="http://${vminfo:kubernetes:public_ip}.sslip.io:30140" target="_blank">http://${vminfo:kubernetes:public_ip}.sslip.io:30140 </a> and use the default admin credentials: username = `admin`, password = `prom-operator`
+Checkout a dashboard like the `Kubernetes/Kubelet` dashboard
 
 
 
