@@ -5,6 +5,12 @@ weight = 15
 
 # Create a cluster with kubeadm
 
+1. Do a dryrun with kubeadm to create a cluster
+```ctr:kubernetes
+sudo kubeadm init --cri-socket=unix:///run/containerd/containerd.sock --dry-run
+```
+
+2. If the dryrun is successful, continue with creating a cluster
 ```ctr:kubernetes
 sudo kubeadm init --cri-socket=unix:///run/containerd/containerd.sock
 ```
@@ -85,7 +91,9 @@ kubeadm join 172.31.42.53:6443 --token 0cy7s2.w9tjwwg2qdryn4aa \
 	--discovery-token-ca-cert-hash sha256:b3b8cce7e14bab053afd42e4c5260370c90e86ccb6602a9c45f1b6c4f5d9d103 
 ```
 
-2.
+2. Follow the instructions from the end of `kubeadm init`, this copies the kubeconfig file to where kubectl expectes the kubeconfig file to be.
+The kubeconfig file contains how you will authenticate to the kubernetes cluster.
+
 ```ctr:kubernetes
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -114,7 +122,7 @@ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
 Expected output:
 ```
-node/ip-172-31-42-53 untainted
+node/${vminfo:kubernetes:hostname} untainted
 ```
 
 5. Check if the cluster is ready
@@ -125,7 +133,7 @@ kubectl get nodes
 Expected output:
 ```shell
 NAME              STATUS     ROLES           AGE   VERSION
-ip-172-31-42-53   NotReady   control-plane   12m   v1.28.2
+${vminfo:kubernetes:hostname}   NotReady   control-plane   12m   v1.28.2
 ````
 
 

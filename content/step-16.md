@@ -214,7 +214,7 @@ kubectl get nodes
 
 ```shell
 NAME              STATUS   ROLES           AGE   VERSION
-ip-172-31-42-53   Ready    control-plane   25m   v1.28.2
+${vminfo:kubernetes:hostname}   Ready    control-plane   25m   v1.28.2
 ```
 
 6. Kubernetes components

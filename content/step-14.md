@@ -55,14 +55,13 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 kubectl version --client
 ```
 
-6. Test kubectl
-
-```ctr:kubernetes
+Expected output:
+```shell
 Client Version: v1.28.2
 Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3
 ```
 
-7. Test if kubectl is configured by retrieving the cluster state (we expect this to fail)
+6. Test kubectl by retrieving the cluster state (we expect this to fail)
 
 ```ctr:kubernetes
 kubectl cluster-info
@@ -79,14 +78,3 @@ E1017 21:31:38.480359    1921 memcache.go:265] couldn't get current server API g
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 The connection to the server localhost:8080 was refused - did you specify the right host or port?
 ```
-
-8. Enable and start kubelet
-```ctr:kubernetes
-sudo systemctl enable --now kubelet
-```
-
-Expected output:
-```shell
-Created symlink /etc/systemd/system/multi-user.target.wants/kubelet.service → /etc/systemd/system/kubelet.service.
-```
-

@@ -105,10 +105,15 @@ kube-prometheus-stack-prometheus-node-exporter   ClusterIP   10.97.91.228    <no
 prometheus-operated                              ClusterIP   None            <none>        9090/TCP                        11s
 ```
 
-6. To access Prometheus go to your node's IP on port 30090, <a href="http://${vminfo:kubernetes:public_ip}.sslip.io:30090" target="_blank">http://${vminfo:kubernetes:public_ip}.sslip.io:30090</a>
+6. To access Prometheus go to your node's IP on port 30090, <a href="http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30090" target="_blank">http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30090</a>
 
-7. To access Grafana go to your node's IP on port 30140, <a href="http://${vminfo:kubernetes:public_ip}.sslip.io:30140" target="_blank">http://${vminfo:kubernetes:public_ip}.sslip.io:30140 </a> and use the default admin credentials: username = `admin`, password = `prom-operator`
-Checkout a dashboard like the `Kubernetes/Kubelet` dashboard
+7. Prometheus uses Prometheus Querying Language (PromQL) to query metrics.
+Run a few PromQL queries in the browers:
+`node_cpu_seconds_total{cpu="0"}[5m]` shows the total amount of CPU time spent over the last 5 minutes
+
+8. To access Grafana go to your node's IP on port 30140, <a href="http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30140" target="_blank">http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30140 </a> and use the default admin credentials: username = `admin`, password = `prom-operator`
+
+9. From the hamburger menu in the top left, go to Dashboards and checkout a dashboard like the `Kubernetes/Kubelet` dashboard
 
 
 

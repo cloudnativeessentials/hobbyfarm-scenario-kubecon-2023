@@ -43,24 +43,181 @@ Hang tight while we grab the latest from your chart repositories...
 Update Complete. ⎈Happy Helming!⎈
 ```
 
-2. To install fluentd with the release name of fluentd.
+2. Install fluentd with the release name of fluentd in the fluentd namespace
 
 ```ctr:kubernetes
-helm install fluentd fluent/fluentd
+helm install fluentd fluent/fluentd --namespace kube-system --set variant=elasticsearch8
 ```
 
 Expected output
 ```shell
 NAME: fluentd
-LAST DEPLOYED: Thu Oct 19 21:27:11 2023
-NAMESPACE: default
+LAST DEPLOYED: Wed Nov  1 21:27:17 2023
+NAMESPACE: fluentd
 STATUS: deployed
 REVISION: 1
 NOTES:
 Get Fluentd build information by running these commands:
 
-export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=fluentd,app.kubernetes.io/instance=fluentd" -o jsonpath="{.items[0].metadata.name}")
-kubectl --namespace default port-forward $POD_NAME 24231:24231
+export POD_NAME=$(kubectl get pods --namespace fluentd -l "app.kubernetes.io/name=fluentd,app.kubernetes.io/instance=fluentd" -o jsonpath="{.items[0].metadata.name}")
+kubectl --namespace fluentd port-forward $POD_NAME 24231:24231
 curl http://127.0.0.1:24231/metrics
 ```
 
+fluentd is deployed as a DaemonSet resource. A DaemonSet ensures a Pod of the DaemonSet runs on all nodes of the cluster.
+
+Check the fleuntd DaemonSet is running
+```ctr:kubernetes
+kubectl get daemonset -n fluentd
+```
+
+Expected output:
+```shell
+NAME      DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+fluentd   1         1         0       1            0           <none>          3m25s
+```
+
+By default the DaemonSet is configured with Elasticsearch as the fluentd output.
+You can verify with the container image 
+```ctr:kubernetes
+kubectl get ds fluentd -n fluentd -o yaml | grep image:
+```
+
+Expected output:
+```shell
+    image: fluent/fluentd-kubernetes-daemonset:v1.16.2-debian-elasticsearch7-1.0
+```
+
+
+## Install Elasticsearch, Logstash, and Kibana 
+
+The default output for the fluentd helm chart is elasticsearch.
+We will install the following:
+  - Elasticsearch which is a search/analytics engine and a log analytics tool
+  - Logstash to collect logs and send to Elasticsearch for storage and analysis
+  - Filebeat to 
+  - Kibana to visualize the data stored in Elasticsearch
+
+```ctr:kubernetes
+helm repo add elastic https://helm.elastic.co
+helm repo update
+```
+
+Expected output:
+```shell
+"elastic" has been added to your repositories
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "fluent" chart repository
+...Successfully got an update from the "elastic" chart repository
+...Successfully got an update from the "prometheus-community" chart repository
+Update Complete. ⎈Happy Helming!⎈
+```
+
+## Install Elasticsearch, Logstash, and Kibana 
+
+By default, the fluentd helm chart 
+
+Install Elasticsearch
+```ctr:kubernetes
+helm install elasticsearch elastic/elasticsearch --set replicas=1 --set minimumMasterNodes=1 --set secret.password=changeme --set resources.requests.cpu=100m --set resources.requests.memory=100Mi --set persistence.enabled=false -n elk --create-namespace
+```
+
+Expected output:
+```shell
+NAME: elasticsearch
+LAST DEPLOYED: Thu Nov  2 04:28:58 2023
+NAMESPACE: elk
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Watch all cluster members come up.
+  $ kubectl get pods --namespace=elk -l app=elasticsearch-master -w
+2. Retrieve elastic user's password.
+  $ kubectl get secrets --namespace=elk elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
+3. Test cluster health using Helm test.
+  $ helm --namespace=elk test elasticsearch
+```
+
+Elasticsearch will take a few minutes to be at a `ready` state/
+You can check the status of the Elasticsearch pod with `kubectl get pods`
+```ctr:kubernetes
+kubectl get pods -n elk
+```
+
+Expected output:
+```shell
+NAME                     READY   STATUS    RESTARTS   AGE
+elasticsearch-master-0   1/1     Running   0          2m19s
+```
+
+Wait until the `elasticsearch-master-0` is ready before proceeding.
+
+Install Logstash
+```ctr:kubernetes
+helm install logstash elastic/logstash -n elk
+```
+
+Expected output:
+```shell
+NAME: logstash
+LAST DEPLOYED: Thu Nov  2 05:42:26 2023
+NAMESPACE: elk
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+1. Watch all cluster members come up.
+  $ kubectl get pods --namespace=elk -l app=logstash-logstash -w
+```
+
+Wait until the logstash pod is ready before proceeding
+```ctr:kubernetes
+kubectl get pods --namespace=elk -l app=logstash-logstash
+```
+
+Expected output:
+```shell
+NAME                  READY   STATUS    RESTARTS   AGE
+logstash-logstash-0   1/1     Running   0          94s
+```
+
+Install Filebeat
+
+
+Install Kibana
+```ctr:kubernetes
+helm install kibana elastic/kibana --set resources.requests.cpu=100m --set resources.requests.memory=100Mi --set service.type=NodePort --set service.nodePort=30001 -n elk
+```
+
+Expected output:
+```shell
+NAME: kibana
+LAST DEPLOYED: Thu Nov  2 05:48:14 2023
+NAMESPACE: elk
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+1. Watch all containers come up.
+  $ kubectl get pods --namespace=elk -l release=kibana -w
+2. Retrieve the elastic user's password.
+  $ kubectl get secrets --namespace=elk elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
+3. Retrieve the kibana service account token.
+  $ kubectl get secrets --namespace=elk kibana-kibana-es-token -ojsonpath='{.data.token}' | base64 -d
+```
+
+Wait until the kibana Pod is ready before proceeding
+```ctr:kubernetes
+kubectl get pods -n elk -l app=kibana
+```
+
+Expected output:
+```shell
+NAME                             READY   STATUS    RESTARTS   AGE
+kibana-kibana-6888db469c-djkv7   1/1     Running   0          111s
+```
+
+Use your browser to access kibana
+<a href="https://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30001" target="_blank">https://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30001</a>
+
+Login in with the username = `elastic`, password = `changeme`

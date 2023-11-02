@@ -155,6 +155,7 @@ runc.amd64.asc                        100%[=====================================
 2023-10-17 20:15:46 (46.0 MB/s) - ‘runc.amd64.asc’ saved [854/854]
 ```
 
+Install runc
 ```ctr:kubernetes
 sudo install -m 755 runc.amd64 /usr/local/sbin/runc
 ```
