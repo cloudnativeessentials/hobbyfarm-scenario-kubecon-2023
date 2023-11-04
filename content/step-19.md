@@ -3,6 +3,8 @@ title = "Observability: Metrics"
 weight = 19
 +++
 
+# Observability: Metrics
+
 There are 3 pillars of observability: metrics, traces, and logs.
 In this tutorial, you will install monitoring and logging solutions.
 Let's start with monitoring.
