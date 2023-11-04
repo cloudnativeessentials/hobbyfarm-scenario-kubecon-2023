@@ -31,5 +31,5 @@ Some browsers might show a warning stating that the Certificate Authority (CA) i
    username: `admin`
    password: `Harbor12345`
 
-4. Create a new project, give it the name `cloudnativeessentials` and use the defaults
+4. Create a new project, give it the name `cloudnativeessentials`, set it for public and use the defaults for the rest.
 

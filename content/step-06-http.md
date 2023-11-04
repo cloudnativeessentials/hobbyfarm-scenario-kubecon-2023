@@ -15,11 +15,11 @@ Press `i` for insert mode and enter:
 
 ```shell
 {
-    "insecure-registries" : [ "harbor.35.92.144.228.sslip.io" ]
+    "insecure-registries" : [ "harbor.${vminfo:harbor:public_ip}.sslip.io" ]
 }
 ```
 
-Use esc :wq <enter>
+To save: `esc:wq` 
 
 2. Restart Docker
 
@@ -54,5 +54,5 @@ Some browsers might show a warning stating that the Certificate Authority (CA) i
    username: `admin`
    password: `Harbor12345`
 
-6. Create a new project, give it the name `cloudnativeessentials` and use the defaults
+6. Create a new project, give it the name `cloudnativeessentials`, set it for public and use the defaults for the rest.
 

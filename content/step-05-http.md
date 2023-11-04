@@ -207,6 +207,8 @@ Edit the `https:` section to read:
   # private_key: /your/private/key/path
 ```
 
+To save: `esc:wq`
+
 ## Deploy Harbor
 
 9. Run `install.sh`
