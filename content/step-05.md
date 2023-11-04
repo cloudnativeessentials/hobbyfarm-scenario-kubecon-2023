@@ -96,13 +96,14 @@ Saving to: ‘harbor-online-installer-v2.7.3.tgz’
 harbor-online-installer-v2.7.3.tgz    100%[=========================================================================>]  10.83K  --.-KB/s    in 0s      
 
 2023-10-12 18:58:00 (33.7 MB/s) - ‘harbor-online-installer-v2.7.3.tgz’ saved [11087/11087]
-
 ```
 
-Download the asc file
+2. Download the asc file
+
 ```ctr:harbor
 wget https://github.com/goharbor/harbor/releases/download/v2.7.3/harbor-online-installer-v2.7.3.tgz.asc
 ```
+
 Expected output:
 
 ```shell
@@ -123,7 +124,7 @@ harbor-online-installer-v2.7.3.tgz.as 100%[=====================================
 2023-10-12 18:58:31 (46.2 MB/s) - ‘harbor-online-installer-v2.7.3.tgz.asc’ saved [833/833]
 ```
 
-2. Obtain the public key for the `asc` file
+3. Obtain the public key for the `asc` file
 
 ```ctr:harbor
 gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys 644FF454C0B4115C
@@ -139,7 +140,7 @@ gpg: Total number processed: 1
 gpg:               imported: 1
 ```
 
-3. Verify the genuity of the package
+4. Verify the genuity of the package
 
 The `gpg` command verifies that the bundle’s signature matches that of the *.asc key file. You should see confirmation that the signature is correct
 
@@ -160,7 +161,7 @@ Primary key fingerprint: 7722 D168 DAEC 4578 06C9  6FF9 644F F454 C0B4 115C
 gpg: binary signature, digest algorithm SHA512, key algorithm rsa4096
 ```
 
-4. Extract the installer package
+5. Extract the installer package
 
 ```ctr:harbor
 tar xzvf harbor-online-installer-v2.7.3.tgz
@@ -175,204 +176,42 @@ harbor/common.sh
 harbor/harbor.yml.tmpl
 ```
 
-## Configure HTTPS access to Harbor
-
-You will use OpenSSL to create SSL certificates to configure HTTPS.
-In the following steps, you will use OpenSSL to create a CA and use your CA to sign a server and a client certificates.
-Your Harbor registry's hostname will be harbor.<public-ip>.sslip.io
-In this case it will be harbor.${vminfo:harbor:public_ip}.sslip.io
-
-1. Genereate a CA certificate private key
-
-```ctr:harbor
-openssl genrsa -out ca.key 4096
-```
-
-Expected output:
-```shell
-Generating RSA private key, 4096 bit long modulus (2 primes)
-....++++
-...............................++++
-e is 65537 (0x010001)
-```
-
-2. Generate the CA certificate
-
-```ctr:harbor
-openssl req -x509 -new -nodes -sha512 -days 365 \
--subj "/C=CN/ST=Chicago/L=Chicago/O=kubecon/OU=cloudnativeessentials/CN=harbor.${vminfo:harbor:public_ip}.sslip.io" \
--key ca.key \
--out ca.crt
-```
-
-If you're curious about the `openssl req` options, checkout https://www.openssl.org/docs/man1.0.2/man1/openssl-req.html
-
-3. Generate a Server Certificate
-
-```ctr:harbor
-openssl genrsa -out harbor.${vminfo:harbor:public_ip}.sslip.io.key 4096
-```
-
-4. Generate a certificate signing request (CSR)
-
-```ctr:harbor
-openssl req -sha512 -new \
--subj "/C=CN/ST=Chicago/L=Chicago/O=kubecon/OU=cloudnativeessentials/CN=harbor.${vminfo:harbor:public_ip}.sslip.io" \
--key harbor.${vminfo:harbor:public_ip}.sslip.io.key \
--out harbor.${vminfo:harbor:public_ip}.sslip.io.csr
-```
-
-5. Generate an x509 v3 extension file
-
-```ctr:harbor
-cat > v3.ext <<-EOF
-authorityKeyIdentifier=keyid,issuer
-basicConstraints=CA:FALSE
-keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-extendedKeyUsage = serverAuth
-subjectAltName = @alt_names
-
-[alt_names]
-DNS.1=harbor.${vminfo:harbor:public_ip}.sslip.io
-DNS.2=harbor.${vminfo:harbor:public_ip}.sslip
-DNS.3=${vminfo:harbor:public_ip}
-DNS.4=${vminfo:harbor:hostname}
-EOF
-```
-
-6. Use the `v3.ext` file to generate a certificate for the Harbor instance
-
-```ctr:harbor
-openssl x509 -req -sha512 -days 365 \
--extfile v3.ext \
--CA ca.crt -CAkey ca.key -CAcreateserial \
--in harbor.${vminfo:harbor:public_ip}.sslip.io.csr \
--out harbor.${vminfo:harbor:public_ip}.sslip.io.crt
-```
-
-Expected output:
-
-```shell
-Certificate request self-signature ok
-subject=C = CN, ST = Chicago, L = Chicago, O = kubecon, OU = cloudnativeessentials, CN = harbor.${vminfo:harbor:public_ip}.sslip.io
-```
-
-7. Copy the server certificate and key into the certificates folder
-
-```ctr:harbor
-sudo mkdir -p /data/cert/
-sudo cp harbor.${vminfo:harbor:public_ip}.sslip.io.crt /data/cert/
-sudo cp harbor.${vminfo:harbor:public_ip}.sslip.io.key /data/cert/
-```
-
-8. Convert your `harbor.${vminfo:harbor:public_ip}.sslip.io.crt` to `harbor.${vminfo:harbor:public_ip}.sslip.io.cert` for use by the container runtime (Docker).
-`.cert` files are interpretted as client certificates while `.crt` files are interpretted as CA certificates
-
-```ctr:harbor
-openssl x509 -inform PEM -in harbor.${vminfo:harbor:public_ip}.sslip.io.crt -out harbor.${vminfo:harbor:public_ip}.sslip.io.cert
-```
-
-9. Copy the server certificate, key, and CA files into the Docker certificates folder.
-
-```ctr:harbor
-sudo mkdir -p /etc/docker/certs.d/harbor.${vminfo:harbor:public_ip}.sslip.io/
-sudo cp harbor.${vminfo:harbor:public_ip}.sslip.io.cert /etc/docker/certs.d/harbor.${vminfo:harbor:public_ip}.sslip.io/
-sudo cp harbor.${vminfo:harbor:public_ip}.sslip.io.key /etc/docker/certs.d/harbor.${vminfo:harbor:public_ip}.sslip.io/
-sudo cp ca.crt /etc/docker/certs.d/harbor.${vminfo:harbor:public_ip}.sslip.io/
-```
-
-10. Restart the container runtime (Docker)
-
-```ctr:harbor
-sudo systemctl restart docker
-```
-
 ## Configure the Harbor YAML file
 
-1. Copy the Harbor yaml template to harbor.yml
+6. Copy the Harbor yaml template to harbor.yml
 
 ```ctr:harbor
 cp ~/harbor/harbor.yml.tmpl ~/harbor/harbor.yml
 ```
 
-2. Update the Harbor yaml file with your Harbor's url
+7. Update the Harbor yaml file with your Harbor's url
+
 ```ctr:harbor
 sed -i 's@reg.mydomain.com@harbor.${vminfo:harbor:public_ip}.sslip.io@g' ~/harbor/harbor.yml
 ```
 
-3. Update the Harbor yaml file with your certificate path
+8. Update the Harbor yaml file to disable https
 
 ```ctr:harbor
-sed -i 's@/your/certificate/path@/etc/docker/certs.d/harbor.${vminfo:harbor:public_ip}.sslip.io/harbor.${vminfo:harbor:public_ip}.sslip.io.cert@g' ~/harbor/harbor.yml
+vi ~/harbor/harbor.yml
 ```
 
-4. Update the Harbor yaml file with your private key path
+Edit the `https:` section to read:
 
-```ctr:harbor
-sed -i 's@/your/private/key/path@/etc/docker/certs.d/harbor.${vminfo:harbor:public_ip}.sslip.io/harbor.${vminfo:harbor:public_ip}.sslip.io.key@g' ~/harbor/harbor.yml
-```
-
-5. On Ubuntu, trust the certificate at the OS level
-
-```ctr:harbor
-sudo cp harbor.${vminfo:harbor:public_ip}.sslip.io.crt /usr/local/share/ca-certificates/harbor.${vminfo:harbor:public_ip}.sslip.io.crt
-sudo update-ca-certificates
-```
-
-Expected output:
 ```shell
-Updating certificates in /etc/ssl/certs...
-rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
-1 added, 0 removed; done.
-Running hooks in /etc/ca-certificates/update.d...
-done.
+# https:
+  # https port for harbor, default is 443
+  # port: 443
+  # The path of cert and key files for nginx
+  # certificate: /your/certificate/path
+  # private_key: /your/private/key/path
 ```
+
+To save: `esc:wq`
 
 ## Deploy Harbor
 
-1. Run `prepare.sh` to enable HTTPS
-
-```ctr:harbor
-~/harbor/./prepare
-```
-
-Expected output:s
-```shell
-prepare base dir is set to /home/ubuntu/harbor
-Unable to find image 'goharbor/prepare:v2.7.3' locally
-v2.7.3: Pulling from goharbor/prepare
-bb02e0e6f531: Pull complete 
-15ea77c40b0c: Pull complete 
-4fd4f792c862: Pull complete 
-accfa41560cd: Pull complete 
-240051058bfe: Pull complete 
-52a85c066dfe: Pull complete 
-a4b51799c095: Pull complete 
-6c4a466efa5c: Pull complete 
-62682b568c4b: Pull complete 
-fa94b64cd7be: Pull complete 
-Digest: sha256:fc012a86968d69a533c1ff7b5d448f2f805c069749f09745d4e87e80032d9076
-Status: Downloaded newer image for goharbor/prepare:v2.7.3
-Generated configuration file: /config/portal/nginx.conf
-Generated configuration file: /config/log/logrotate.conf
-Generated configuration file: /config/log/rsyslog_docker.conf
-Generated configuration file: /config/nginx/nginx.conf
-Generated configuration file: /config/core/env
-Generated configuration file: /config/core/app.conf
-Generated configuration file: /config/registry/config.yml
-Generated configuration file: /config/registryctl/env
-Generated configuration file: /config/registryctl/config.yml
-Generated configuration file: /config/db/env
-Generated configuration file: /config/jobservice/env
-Generated configuration file: /config/jobservice/config.yml
-Generated and saved secret to file: /data/secret/keys/secretkey
-Successfully called func: create_root_cert
-Generated configuration file: /compose_location/docker-compose.yml
-Clean up the input dir
-
-```
-
-2. Run `install.sh`
+9. Run `install.sh`
 ```ctr:harbor
 sudo ~/harbor/./install.sh
 ```
@@ -408,7 +247,7 @@ Clearing the configuration file: /config/registryctl/config.yml
 ✔ ----Harbor has been installed and started successfully.----
 ```
 
-3. Check the Harbor containers 
+10. Check the Harbor containers 
 ```ctr:harbor
 docker ps
 ```
@@ -426,6 +265,3 @@ feddcf259078   goharbor/harbor-db:v2.7.3            "/docker-entrypoint.…"   5
 eaa338023837   goharbor/harbor-registryctl:v2.7.3   "/home/harbor/start.…"   57 seconds ago       Up 55 seconds (healthy)                                                                                    registryctl
 98e7c9694a13   goharbor/harbor-log:v2.7.3           "/bin/sh -c /usr/loc…"   About a minute ago   Up 56 seconds (healthy)   127.0.0.1:1514->10514/tcp                                                        harbor-log
 ```
-
-4. 
-
