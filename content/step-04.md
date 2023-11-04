@@ -73,9 +73,10 @@ docker image ls
 ```
 
 Expected output:
+
 ```shell
 REPOSITORY                    TAG       IMAGE ID       CREATED              SIZE
-simple-app                    0.1       c451b4bdc00a   About a minute ago   884MD
+simple-app                    0.1       c451b4bdc00a   About a minute ago   884MB
 ```
 
 4. Run a container from the new `simple-app:0.1` container image
@@ -89,6 +90,7 @@ docker run --name simple-app -p 8080:8080 --detach --rm simple-app:0.1
 
 
 6. Stop the `simple-app` container
+
 ```ctr:harbor
 docker stop simple-app
 ```
