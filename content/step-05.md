@@ -9,7 +9,9 @@ weight = 5
 
 You installed Docker in a previous step.
 
-1. Docker Compose is a tool to run a multi-container application. The Harbor installer uses a Docker Compose file to start Harbor. Install Docker Compose:
+1. Docker Compose is a tool to run a multi-container application. The Harbor installer uses a Docker Compose file to start Harbor. 
+
+Install Docker Compose:
 
 ```ctr:harbor
 sudo apt install docker-compose -y

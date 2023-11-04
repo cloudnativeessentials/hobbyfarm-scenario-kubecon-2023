@@ -9,7 +9,7 @@ Although Docker is not a CNCF project, it was the project that popularized conta
 
 ## Install Docker
 
-1. Run Docker installer:
+1. Run the Docker installer.
 
 ```ctr:harbor
 wget -qO- https://get.docker.com/ | sh
@@ -24,19 +24,19 @@ Expected output:
 ...
 ```
 
-3. Add user to the docker group
+3. Add user to the docker group.
 
 ```ctr:harbor
 sudo usermod -aG docker $USER
 ```
 
-4. Activate changes to the docker group
+4. Activate changes to the docker group.
 
 ```ctr:harbor
 newgrp docker
 ```
 
-5. Verify Docker is running
+5. Verify Docker is running.
 
 ```ctr:harbor
 docker version
