@@ -1,5 +1,5 @@
 +++
-title = "Containerizing an Application"
+title = "Containerize an Application: Creating simple-app"
 weight = 3
 +++
 

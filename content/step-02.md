@@ -1,5 +1,5 @@
 +++
-title = "Containerizing an Application"
+title = "Containerize an Application: Docker Install"
 weight = 2
 +++
 

@@ -52,15 +52,15 @@ helm install fluentd fluent/fluentd --namespace kube-system --set variant=elasti
 Expected output
 ```shell
 NAME: fluentd
-LAST DEPLOYED: Wed Nov  1 21:27:17 2023
-NAMESPACE: fluentd
+LAST DEPLOYED: Thu Nov  2 07:01:33 2023
+NAMESPACE: kube-system
 STATUS: deployed
 REVISION: 1
 NOTES:
 Get Fluentd build information by running these commands:
 
-export POD_NAME=$(kubectl get pods --namespace fluentd -l "app.kubernetes.io/name=fluentd,app.kubernetes.io/instance=fluentd" -o jsonpath="{.items[0].metadata.name}")
-kubectl --namespace fluentd port-forward $POD_NAME 24231:24231
+export POD_NAME=$(kubectl get pods --namespace kube-system -l "app.kubernetes.io/name=fluentd,app.kubernetes.io/instance=fluentd" -o jsonpath="{.items[0].metadata.name}")
+kubectl --namespace kube-system port-forward $POD_NAME 24231:24231
 curl http://127.0.0.1:24231/metrics
 ```
 
@@ -221,3 +221,103 @@ Use your browser to access kibana
 <a href="https://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30001" target="_blank">https://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30001</a>
 
 Login in with the username = `elastic`, password = `changeme`
+
+
+---
+fluent operator
+
+```ctr:kubernetes
+helm install fluent-operator fluent/fluent-operator --create-namespace -n fluent --set containerRuntime=containerd --set es.enable=true --set es.host=http://elasticsearch-master.elk.svc.cluster.local:9200
+```
+
+Expected output:
+```shell
+NAME: fluent-operator
+LAST DEPLOYED: Thu Nov  2 07:18:26 2023
+NAMESPACE: fluent
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+Thank you for installing  fluent-operator
+Your release is named    fluent-operator
+
+To learn more about the release ,try:
+   $ helm status  fluent-operator  -n  fluent
+   $ helm get  fluent-operator  -n fluent
+```
+
+```ctr:kubernetes
+cat <<EOF > ~/manifests/fluentd.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-logging
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      k8s-app: fluentd-logging
+      version: v1
+  template:
+    metadata:
+      labels:
+        k8s-app: fluentd-logging
+        version: v1
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: fluentd
+        image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch
+        env:
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name:  FLUENT_ELASTICSEARCH_HOST
+            value: "elasticsearch-master.elk.svc.cluster.local"
+          - name:  FLUENT_ELASTICSEARCH_PORT
+            value: "9200"
+          - name: FLUENT_ELASTICSEARCH_SCHEME
+            value: "http"
+          - name: FLUENT_ELASTICSEARCH_SSL_VERIFY
+            value: "true"
+          - name: FLUENT_ELASTICSEARCH_SSL_VERSION
+            value: "TLSv1_2"
+          - name: FLUENT_ELASTICSEARCH_USER
+            value: "elastic"
+          - name: FLUENT_ELASTICSEARCH_PASSWORD
+            value: "changeme"
+          - name: LOGZIO_TOKEN
+            value: "ThisIsASuperLongToken"
+          - name: LOGZIO_LOGTYPE
+            value: "kubernetes"
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: dockercontainerlogdirectory
+          mountPath: /var/log/pods
+          readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: dockercontainerlogdirectory
+        hostPath:
+          path: /var/log/pods
+EOF
+```
