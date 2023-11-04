@@ -104,3 +104,7 @@ kube-proxy-lhz4p                          1/1     Running   0          48m
 kube-scheduler-ip-172-31-42-53            1/1     Running   0          48m
 ```
 
+Kubernetes uses etcd as its key-value store used for all cluster data.
+etcd is a CNCF graduated project.
+
+Kubernetes uses CoreDNS which is a CNCF graduated project. CoreDNS is a DNS server that chains plugins and serves as the cluster DNS.
