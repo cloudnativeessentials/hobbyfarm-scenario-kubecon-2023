@@ -79,11 +79,13 @@ EOF
 ```
 
 6. Test the application
+
 ```ctr:harbor
 go run ~/simple-app/main.go
 ```
 
 When you see
+
 ```shell
 http: 2023/MM/DD HH:MM:SS Server is starting...
 ```
