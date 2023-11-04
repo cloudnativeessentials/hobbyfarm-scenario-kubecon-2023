@@ -99,7 +99,13 @@ The kubeconfig file contains how you will authenticate to the kubernetes cluster
 
 ```ctr:kubernetes
 mkdir -p $HOME/.kube
+```
+
+```ctr:kubernetes
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+```
+
+```ctr:kubernetes
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
