@@ -73,6 +73,7 @@ Processing triggers for man-db (2.9.1-1) ...
 2. In following steps, we will setup Harbor to use http and not https. Docker requires configuration to use insecure registries.
 
 Setup Docker to use an insecure registry by creating an `insecure-registries` entry into `/etc/docker/daemon.json`
+
 Create a `/etc/docker/daemon.json`
 
 ```ctr:harbor
