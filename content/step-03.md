@@ -69,6 +69,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintf(w, "Hostname is " + hostname)
 }
+
 EOF
 ```
 
@@ -77,6 +78,10 @@ EOF
 go run ~/simple-app/main.go
 ```
 
+When you see
+```shell
+http: 2023/MM/DD HH:MM:SS Server is starting...
+```
 7. Open a browser to test the application
 <a href="http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080" target="_blank">http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080</a>
 

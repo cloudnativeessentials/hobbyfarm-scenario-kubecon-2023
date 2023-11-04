@@ -11,12 +11,11 @@ Each Dockerfile starts with the `FROM` instruction.
 1. Create a Dockerfile for the simple app
 ```ctr:harbor
 cat <<EOF > ~/simple-app/Dockerfile
-FROM golang:1.21.3
+FROM golang:1.21.0
 LABEL project=cloudnativeessentials
 WORKDIR /app
-COPY go.mod ./
-RUN go mod download
 COPY *.go ./
+RUN go mod init simple-app
 RUN go build -o /simple-app
 EXPOSE 8080
 CMD [ "/simple-app" ]
@@ -30,23 +29,19 @@ docker build -t simple-app:0.1 ~/simple-app/.
 
 Expected output:
 ```shell
-[+] Building 1.1s (11/11) FINISHED                                                                                                       docker:default
+[+] Building 0.4s (7/7) FINISHED                                                                                                         docker:default
  => [internal] load build definition from Dockerfile                                                                                               0.0s
- => => transferring dockerfile: 217B                                                                                                               0.0s
+ => => transferring dockerfile: 138B                                                                                                               0.0s
  => [internal] load .dockerignore                                                                                                                  0.0s
  => => transferring context: 2B                                                                                                                    0.0s
  => [internal] load metadata for docker.io/library/golang:1.21.3                                                                                   0.3s
- => [1/6] FROM docker.io/library/golang:1.21.3@sha256:b113af1e8b06f06a18ad41a6b331646dff587d7a4cf740f4852d16c49ed8ad73                             0.0s
  => [internal] load build context                                                                                                                  0.0s
  => => transferring context: 54B                                                                                                                   0.0s
- => CACHED [2/6] WORKDIR /app                                                                                                                      0.0s
- => CACHED [3/6] COPY go.mod ./                                                                                                                    0.0s
- => CACHED [4/6] RUN go mod download                                                                                                               0.0s
- => CACHED [5/6] COPY *.go ./                                                                                                                      0.0s
- => CACHED [6/6] RUN go build -o /simple-app                                                                                                       0.0s
- => exporting to image                                                                                                                             0.8s
- => => exporting layers                                                                                                                            0.8s
- => => writing image sha256:c6f0d3b9fd288da34804bf4b17dcd6b852c59f2d19804fcbb9b7d06643cdcc66                                                       0.0s
+ => [1/2] FROM docker.io/library/golang:1.21.3@sha256:b113af1e8b06f06a18ad41a6b331646dff587d7a4cf740f4852d16c49ed8ad73                             0.0s
+ => CACHED [2/2] COPY *.* ./                                                                                                                       0.0s
+ => exporting to image                                                                                                                             0.0s
+ => => exporting layers                                                                                                                            0.0s
+ => => writing image sha256:dc328b06365405a90dedced916b47f5a3e3c4c19fdd57ae5794755d9f309ca7e                                                       0.0s
  => => naming to docker.io/library/simple-app:0.1                                                                                                  0.0s
 ```
 
@@ -58,7 +53,7 @@ docker image ls
 Expected output:
 ```shell
 REPOSITORY                    TAG       IMAGE ID       CREATED              SIZE
-simple-app                    0.1       c451b4bdc00a   About a minute ago   885MB
+simple-app                    0.1       c451b4bdc00a   About a minute ago   815MB
 ```
 
 4. Run a container from the new `simple-app:0.1` container image
