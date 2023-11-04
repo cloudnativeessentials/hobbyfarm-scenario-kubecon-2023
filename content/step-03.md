@@ -37,8 +37,13 @@ source ~/.profile
 ```
 
 5. Create the simple golang application
+Create the directory for the golang application
 ```ctr:harbor
 mkdir -p ~/simple-app
+```
+
+Create the simple golang application source
+```ctr:harbor
 cat <<EOF > ~/simple-app/main.go
 package main
 
