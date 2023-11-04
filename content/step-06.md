@@ -1,58 +1,60 @@
 +++
-title = "Accessing Harbor"
+title = "Host the Container Image to Harbor"
 weight = 6
 +++
 
-1. Setup Docker to use an insecure registry
+## Push your container image to Harbor
 
-Create a `/etc/docker/daemon.json`
-
-```ctr:harbor
-sudo vi /etc/docker/daemon.json
-```
-
-Press `i` for insert mode and enter:
-
-```shell
-{
-    "insecure-registries" : [ "harbor.${vminfo:harbor:public_ip}.sslip.io" ]
-}
-```
-
-To save: `esc:wq` 
-
-2. Restart Docker
+1. Use `docker tag` to create an image to include your Harbor instance and cloudnativeessentials project.
 
 ```ctr:harbor
-sudo systemctl daemon-reload
-sudo systemctl restart docker
+docker tag simple-app:0.1 harbor.${vminfo:harbor:public_ip}.sslip.io/cloudnativeessentials/simple-app:0.1
 ```
-
-3. Log into Harbor from the Docker client
+2. Use `docker push` to push your container image to Harbor
 
 ```ctr:harbor
-docker login harbor.${vminfo:harbor:public_ip}.sslip.io
+docker push harbor.${vminfo:harbor:public_ip}.sslip.io/cloudnativeessentials/simple-app:0.1
 ```
-
-Use the default admin credentials to login:
-   username: `admin`
-   password: `Harbor12345`
 
 Expected output:
 ```shell
-WARNING! Your password will be stored unencrypted in /home/ubuntu/.docker/config.json.
-Configure a credential helper to remove this warning. See
-https://docs.docker.com/engine/reference/commandline/login/#credentials-store
-
-Login Succeeded
+The push refers to repository [harbor.34.223.238.124.sslip.io/cloudnativeessentials/simple-app]
+508125c76cbd: Pushed 
+b678f20984d2: Pushed 
+518b489031a7: Pushed 
+19b1389586ed: Pushed 
+ede2f060dece: Pushed 
+fe7d12ddfc65: Pushed 
+fbc321379a11: Pushed 
+e51777ae0bce: Pushed 
+2ef3351afa6d: Pushed 
+5cc3a4df1251: Pushed 
+2fa37f2ee66e: Pushed 
+0.1: digest: sha256:593fca85b1a7782af61eaf78cdea99fabeebcb23d8f64fce5d91f77b120d25c8 size: 2622
 ```
 
-4. Access Harbor at <a href="http://harbor.${vminfo:harbor:public_ip}.sslip.io">http://harbor.${vminfo:harbor:public_ip}.sslip.io</a>
-Some browsers might show a warning stating that the Certificate Authority (CA) is unknown. This happens when using a self-signed CA that is not from a trusted third-party CA. You can import the CA to the browser to remove the warning. You can skip this warning. Some Chromium based browsers may not show a skip button. If this is the case, just click anywhere on the error page and type "thisisunsafe" (without quotes). This will force the browser to bypass the warning and accept the certificate.
+3. Go to the Harbor instance and select the cloudnativeessentials project to verify the container image is present
 
-5. Use the default admin credentials:
-   username: `admin`
-   password: `Harbor12345`
 
-6. Create a new project, give it the name `cloudnativeessentials`, set it for public and use the defaults for the rest.
+## Pull and run your container image from Harbor
 
+4. Let's remove the existing simple-app container images from our local VM
+
+```ctr:harbor
+docker image rm simple-app:0.1
+docker image rm harbor.${vminfo:harbor:public_ip}.sslip.io/cloudnativeessentials/simple-app:0.1
+```
+
+5. Use `docker run` to pull the `simple-app:0.1` container image from your Harbor instance and run a container
+
+```ctr:harbor
+docker run --name simple-app -p 8080:8080 --detach --rm harbor.${vminfo:harbor:public_ip}.sslip.io/cloudnativeessentials/simple-app:0.1
+```
+
+6. Open a browser to test the application <a href="http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080" target="_blank">http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080</a>
+
+7. Stop the `simple-app` container
+
+```ctr:harbor
+docker stop simple-app
+```

@@ -1,106 +1,129 @@
 +++
-title = "Cilium"
+title = "Observability: Metrics"
 weight = 16
 +++
 
-Install Cilium
+# Observability: Metrics
 
-1. Install the latest Cilium CLI
+There are 3 pillars of observability: metrics, traces, and logs.
+In this tutorial, you will install monitoring and logging solutions.
+Let's start with monitoring.
 
-```ctr:kubernetes
-CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
-CLI_ARCH=amd64
-if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
-curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
-sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
-sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
-rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
-```
+Prometheus stores and collects metrics as time series data.
+Prometheus is a monitoring and alerting toolkit and is a CNCF graduated project.
 
-Expected output
+There are multiple ways to install Prometheus.
 
-```shell
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 34.5M  100 34.5M    0     0  28.6M      0  0:00:01  0:00:01 --:--:-- 97.0M
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100    92  100    92    0     0    305      0 --:--:-- --:--:-- --:--:--   305
-cilium-linux-amd64.tar.gz: OK
-cilium
-```
+The kube-prometheus-stack is a community-maintained helm chart that is a "batteries-included" chart that includes the following:
+- Prometheus Operator
+- Prometheus with Prometheus rules
+- Alertmanager
+- Prometheus node-exporter
+- Prometheus Adapter for Kubernetes Metrics APIs
+- kube-state-metrics
+- Grafana with dashboards
 
-2. Install Cilium into the Kubernetes cluster pointed to by your current kubectl context:
+1. Add the Prometheus community helm repository.
 
 ```ctr:kubernetes
-cilium install --version 1.14.2
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 ```
 
 Expected output:
 
 ```shell
-ℹ️  Using Cilium version 1.14.2
-🔮 Auto-detected cluster name: kubernetes
-🔮 Auto-detected kube-proxy has been installed
+"prometheus-community" has been added to your repositories
 ```
 
-3. Validate the Cilium install
+2. Update information of available charts locally from chart repositories
 
 ```ctr:kubernetes
-cilium status --wait
+helm repo update
+```
+
+Expected output:
+```shell
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "prometheus-community" chart repository
+Update Complete. ⎈Happy Helming!⎈
+```
+
+3. Use helm to install the kube-prometheus-stack 
+
+```ctr:kubernetes
+helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+--set alertmanager.service.type=NodePort \
+--set prometheusOperator.service.type=NodePort \
+--set prometheus.service.type=NodePort \
+--set grafana.service.type=NodePort \
+--set grafana.service.nodePort=30140 \
+--namespace kube-prometheus-stack \
+--create-namespace \
+--set namespaceOverride=kube-prometheus-stack \
+--set grafana.namespaceOverride=kube-prometheus-stack \
+--set kube-state-metrics.namespaceOverride=kube-prometheus-stack \
+--set prometheus-node-exporter.namespaceOverride=kube-prometheus-stack
 ```
 
 Expected output:
 
 ```shell
-    /¯¯\
- /¯¯\__/¯¯\    Cilium:             OK
- \__/¯¯\__/    Operator:           OK
- /¯¯\__/¯¯\    Envoy DaemonSet:    disabled (using embedded mode)
- \__/¯¯\__/    Hubble Relay:       disabled
-    \__/       ClusterMesh:        disabled
+NAME: kube-prometheus-stack
+LAST DEPLOYED: Wed Oct 18 21:31:24 2023
+NAMESPACE: kube-prometheus-stack
+STATUS: deployed
+REVISION: 1
+NOTES:
+kube-prometheus-stack has been installed. Check its status by running:
+  kubectl --namespace kube-prometheus-stack get pods -l "release=kube-prometheus-stack"
 
-Deployment             cilium-operator    Desired: 1, Ready: 1/1, Available: 1/1
-DaemonSet              cilium             Desired: 1, Ready: 1/1, Available: 1/1
-Containers:            cilium             Running: 1
-                       cilium-operator    Running: 1
-Cluster Pods:          2/2 managed by Cilium
-Helm chart version:    1.14.2
-Image versions         cilium             quay.io/cilium/cilium:v1.14.2@sha256:6263f3a3d5d63b267b538298dbeb5ae87da3efacf09a2c620446c873ba807d35: 1
-                       cilium-operator    quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d: 1
+Visit https://github.com/prometheus-operator/kube-prometheus for instructions on how to create & configure Alertmanager and Prometheus instances using the Operator.
 ```
 
-4. Test the cluster's readiness
+4. Check the status of the installation.
 
 ```ctr:kubernetes
-kubectl get nodes
-```
-
-```shell
-NAME              STATUS   ROLES           AGE   VERSION
-${vminfo:kubernetes:hostname}   Ready    control-plane   25m   v1.28.2
-```
-
-5. Check the Kubernetes components running as Pods
-
-```ctr:kubernetes
-kubectl get pods -n kube-system
+kubectl --namespace kube-prometheus-stack get pods -l "release=kube-prometheus-stack"
 ```
 
 Expected output:
 
 ```shell
-NAME                                      READY   STATUS    RESTARTS   AGE
-cilium-operator-5d47789fcb-mft24          1/1     Running   0          31m
-cilium-pngps                              1/1     Running   0          31m
-coredns-5dd5756b68-qq55f                  1/1     Running   0          48m
-coredns-5dd5756b68-qsj62                  1/1     Running   0          48m
-etcd-ip-172-31-42-53                      1/1     Running   0          48m
-kube-apiserver-ip-172-31-42-53            1/1     Running   0          48m
-kube-controller-manager-ip-172-31-42-53   1/1     Running   0          48m
-kube-proxy-lhz4p                          1/1     Running   0          48m
-kube-scheduler-ip-172-31-42-53            1/1     Running   0          48m
+NAME                                                        READY   STATUS    RESTARTS   AGE
+kube-prometheus-stack-kube-state-metrics-6bdd78dc74-4frg8   1/1     Running   0          44s
+kube-prometheus-stack-operator-67bc68d75-h8z5d              1/1     Running   0          44s
+kube-prometheus-stack-prometheus-node-exporter-nhpzn        1/1     Running   0          44s
 ```
+
+5. Kubernetes Services expose applications. A Service type of NodePort exposes Services at each Kubernetes nodes' IP at a static port from 30000 to 32767. Check the services
+
+```ctr:kubernetes
+kubectl get services -n kube-prometheus-stack
+```
+
+Expected output:
+
+```shell
+NAME                                             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                         AGE
+alertmanager-operated                            ClusterIP   None            <none>        9093/TCP,9094/TCP,9094/UDP      13s
+kube-prometheus-stack-alertmanager               NodePort    10.102.162.47   <none>        9093:30903/TCP,8080:32403/TCP   18s
+kube-prometheus-stack-grafana                    NodePort    10.110.209.69   <none>        80:30140/TCP                    18s
+kube-prometheus-stack-kube-state-metrics         ClusterIP   10.107.28.248   <none>        8080/TCP                        18s
+kube-prometheus-stack-operator                   NodePort    10.111.61.81    <none>        443:30443/TCP                   18s
+kube-prometheus-stack-prometheus                 NodePort    10.96.184.91    <none>        9090:30090/TCP,8080:30167/TCP   18s
+kube-prometheus-stack-prometheus-node-exporter   ClusterIP   10.97.91.228    <none>        9100/TCP                        18s
+prometheus-operated                              ClusterIP   None            <none>        9090/TCP                        11s
+```
+
+6. To access Prometheus go to your node's IP on port 30090, <a href="http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30090" target="_blank">http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30090</a>
+
+7. Prometheus uses Prometheus Querying Language (PromQL) to query metrics.
+Run a few PromQL queries in the browers:
+`node_cpu_seconds_total{cpu="0"}[5m]` shows the total amount of CPU time spent over the last 5 minutes
+
+8. To access Grafana go to your node's IP on port 30140, <a href="http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30140" target="_blank">http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30140 </a> and use the default admin credentials: username = `admin`, password = `prom-operator`
+
+9. From the hamburger menu in the top left, go to Dashboards and checkout a dashboard like the `Kubernetes/Kubelet` dashboard
+
+
 

@@ -5,7 +5,7 @@ weight = 5
 
 # Harbor Installation
 
-## Prerequisites: Docker Compose
+## Prerequisites: Docker Compose and Docker Insecure Registry
 
 You installed Docker in a previous step.
 
@@ -70,10 +70,37 @@ Setting up docker-compose (1.25.0-1) ...
 Processing triggers for man-db (2.9.1-1) ...
 ```
 
+2. Setup Docker to use an insecure registry
+
+Create a `/etc/docker/daemon.json`
+
+```ctr:harbor
+sudo vi /etc/docker/daemon.json
+```
+
+Press `i` for insert mode and enter:
+
+```shell
+{
+    "insecure-registries" : [ "harbor.${vminfo:harbor:public_ip}.sslip.io" ]
+}
+```
+
+To save: `esc:wq` 
+
+3. Restart Docker
+
+```ctr:harbor
+sudo systemctl daemon-reload
+```
+
+```ctr:harbor
+sudo systemctl restart docker
+```
 
 ## Harbor Installation
 
-1. Download the Harbor online installer
+4. Download the Harbor online installer
 
 ```ctr:harbor
 wget https://github.com/goharbor/harbor/releases/download/v2.7.3/harbor-online-installer-v2.7.3.tgz
@@ -98,7 +125,7 @@ harbor-online-installer-v2.7.3.tgz    100%[=====================================
 2023-10-12 18:58:00 (33.7 MB/s) - ‘harbor-online-installer-v2.7.3.tgz’ saved [11087/11087]
 ```
 
-2. Download the asc file
+5. Download the asc file
 
 ```ctr:harbor
 wget https://github.com/goharbor/harbor/releases/download/v2.7.3/harbor-online-installer-v2.7.3.tgz.asc
@@ -124,7 +151,7 @@ harbor-online-installer-v2.7.3.tgz.as 100%[=====================================
 2023-10-12 18:58:31 (46.2 MB/s) - ‘harbor-online-installer-v2.7.3.tgz.asc’ saved [833/833]
 ```
 
-3. Obtain the public key for the `asc` file
+6. Obtain the public key for the `asc` file
 
 ```ctr:harbor
 gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys 644FF454C0B4115C
@@ -140,7 +167,7 @@ gpg: Total number processed: 1
 gpg:               imported: 1
 ```
 
-4. Verify the genuity of the package
+7. Verify the genuity of the package
 
 The `gpg` command verifies that the bundle’s signature matches that of the *.asc key file. You should see confirmation that the signature is correct
 
@@ -161,7 +188,7 @@ Primary key fingerprint: 7722 D168 DAEC 4578 06C9  6FF9 644F F454 C0B4 115C
 gpg: binary signature, digest algorithm SHA512, key algorithm rsa4096
 ```
 
-5. Extract the installer package
+8. Extract the installer package
 
 ```ctr:harbor
 tar xzvf harbor-online-installer-v2.7.3.tgz
@@ -178,19 +205,19 @@ harbor/harbor.yml.tmpl
 
 ## Configure the Harbor YAML file
 
-6. Copy the Harbor yaml template to harbor.yml
+9. Copy the Harbor yaml template to harbor.yml
 
 ```ctr:harbor
 cp ~/harbor/harbor.yml.tmpl ~/harbor/harbor.yml
 ```
 
-7. Update the Harbor yaml file with your Harbor's url
+10. Update the Harbor yaml file with your Harbor's url
 
 ```ctr:harbor
 sed -i 's@reg.mydomain.com@harbor.${vminfo:harbor:public_ip}.sslip.io@g' ~/harbor/harbor.yml
 ```
 
-8. Update the Harbor yaml file to disable https
+11. Update the Harbor yaml file to disable https
 
 ```ctr:harbor
 vi ~/harbor/harbor.yml
@@ -211,7 +238,7 @@ To save: `esc:wq`
 
 ## Deploy Harbor
 
-9. Run `install.sh`
+12. Run `install.sh`
 ```ctr:harbor
 sudo ~/harbor/./install.sh
 ```
@@ -265,3 +292,31 @@ feddcf259078   goharbor/harbor-db:v2.7.3            "/docker-entrypoint.…"   5
 eaa338023837   goharbor/harbor-registryctl:v2.7.3   "/home/harbor/start.…"   57 seconds ago       Up 55 seconds (healthy)                                                                                    registryctl
 98e7c9694a13   goharbor/harbor-log:v2.7.3           "/bin/sh -c /usr/loc…"   About a minute ago   Up 56 seconds (healthy)   127.0.0.1:1514->10514/tcp                                                        harbor-log
 ```
+
+13. Log into Harbor from the Docker client
+
+```ctr:harbor
+docker login harbor.${vminfo:harbor:public_ip}.sslip.io
+```
+
+Use the default admin credentials to login:
+   username: `admin`
+   password: `Harbor12345`
+
+Expected output:
+```shell
+WARNING! Your password will be stored unencrypted in /home/ubuntu/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+```
+
+14. Access Harbor at <a href="http://harbor.${vminfo:harbor:public_ip}.sslip.io">http://harbor.${vminfo:harbor:public_ip}.sslip.io</a>
+Some browsers might show a warning stating that the Certificate Authority (CA) is unknown. This happens when using a self-signed CA that is not from a trusted third-party CA. You can import the CA to the browser to remove the warning. You can skip this warning. Some Chromium based browsers may not show a skip button. If this is the case, just click anywhere on the error page and type "thisisunsafe" (without quotes). This will force the browser to bypass the warning and accept the certificate.
+
+15. Use the default admin credentials:
+   username: `admin`
+   password: `Harbor12345`
+
+16. Create a new project, give it the name `cloudnativeessentials`, set it for public and use the defaults for the rest.

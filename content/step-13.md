@@ -1,91 +1,106 @@
 +++
-title = "Kubernetes Installation: kubeadm and kubelet"
+title = "Cilium"
 weight = 13
 +++
 
-# Kubernetes Installation: kubeadm, kubelet, kubelet systemd service
+Install Cilium
 
-1. Check the latest Kubernetes version.
+1. Install the latest Cilium CLI
 
 ```ctr:kubernetes
-curl -sSL https://dl.k8s.io/release/stable.txt -w "\n"
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 ```
 
-2. Install kubeadm, kubelet, and kubelet systemd service
+Expected output
 
-```ctr:kubernetes
-RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
-ARCH="amd64"
-RELEASE_VERSION="v0.16.2"
+```shell
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 34.5M  100 34.5M    0     0  28.6M      0  0:00:01  0:00:01 --:--:-- 97.0M
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    92  100    92    0     0    305      0 --:--:-- --:--:-- --:--:--   305
+cilium-linux-amd64.tar.gz: OK
+cilium
 ```
 
-```ctr:kubernetes
-cd $DOWNLOAD_DIR
-sudo curl -L --remote-name-all https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubelet}
-sudo chmod +x {kubeadm,kubelet}
-```
+2. Install Cilium into the Kubernetes cluster pointed to by your current kubectl context:
 
 ```ctr:kubernetes
-curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /etc/systemd/system/kubelet.service
-```
-
-```ctr:kubernetes
-sudo mkdir -p /etc/systemd/system/kubelet.service.d
-```
-
-```ctr:kubernetes
-curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-cd ~
+cilium install --version 1.14.2
 ```
 
 Expected output:
 
 ```shell
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100   138  100   138    0     0    743      0 --:--:-- --:--:-- --:--:--   745
-100 48.4M  100 48.4M    0     0  23.7M      0  0:00:02  0:00:02 --:--:-- 31.7M
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100   138  100   138    0     0   2432      0 --:--:-- --:--:-- --:--:--  2464
-100  105M  100  105M    0     0   156M      0 --:--:-- --:--:-- --:--:--  156M
-[Unit]
-Description=kubelet: The Kubernetes Node Agent
-Documentation=https://kubernetes.io/docs/
-Wants=network-online.target
-After=network-online.target
-
-[Service]
-ExecStart=/usr/local/bin/kubelet
-Restart=always
-StartLimitInterval=0
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-# Note: This dropin only works with kubeadm and kubelet v1.11+
-[Service]
-Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
-Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
-# This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
-EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
-# This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use
-# the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.
-EnvironmentFile=-/etc/sysconfig/kubelet
-ExecStart=
-ExecStart=/usr/local/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS
+ℹ️  Using Cilium version 1.14.2
+🔮 Auto-detected cluster name: kubernetes
+🔮 Auto-detected kube-proxy has been installed
 ```
 
-3. Enable and start kubelet
+3. Validate the Cilium install
 
 ```ctr:kubernetes
-sudo systemctl enable --now kubelet
+cilium status --wait
 ```
 
 Expected output:
 
 ```shell
-Created symlink /etc/systemd/system/multi-user.target.wants/kubelet.service → /etc/systemd/system/kubelet.service.
+    /¯¯\
+ /¯¯\__/¯¯\    Cilium:             OK
+ \__/¯¯\__/    Operator:           OK
+ /¯¯\__/¯¯\    Envoy DaemonSet:    disabled (using embedded mode)
+ \__/¯¯\__/    Hubble Relay:       disabled
+    \__/       ClusterMesh:        disabled
+
+Deployment             cilium-operator    Desired: 1, Ready: 1/1, Available: 1/1
+DaemonSet              cilium             Desired: 1, Ready: 1/1, Available: 1/1
+Containers:            cilium             Running: 1
+                       cilium-operator    Running: 1
+Cluster Pods:          2/2 managed by Cilium
+Helm chart version:    1.14.2
+Image versions         cilium             quay.io/cilium/cilium:v1.14.2@sha256:6263f3a3d5d63b267b538298dbeb5ae87da3efacf09a2c620446c873ba807d35: 1
+                       cilium-operator    quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d: 1
 ```
 
-Note: The kubelet is crashlooping while waiting for kubeadm
+4. Test the cluster's readiness
+
+```ctr:kubernetes
+kubectl get nodes
+```
+
+```shell
+NAME              STATUS   ROLES           AGE   VERSION
+${vminfo:kubernetes:hostname}   Ready    control-plane   25m   v1.28.2
+```
+
+5. Check the Kubernetes components running as Pods
+
+```ctr:kubernetes
+kubectl get pods -n kube-system
+```
+
+Expected output:
+
+```shell
+NAME                                      READY   STATUS    RESTARTS   AGE
+cilium-operator-5d47789fcb-mft24          1/1     Running   0          31m
+cilium-pngps                              1/1     Running   0          31m
+coredns-5dd5756b68-qq55f                  1/1     Running   0          48m
+coredns-5dd5756b68-qsj62                  1/1     Running   0          48m
+etcd-ip-172-31-42-53                      1/1     Running   0          48m
+kube-apiserver-ip-172-31-42-53            1/1     Running   0          48m
+kube-controller-manager-ip-172-31-42-53   1/1     Running   0          48m
+kube-proxy-lhz4p                          1/1     Running   0          48m
+kube-scheduler-ip-172-31-42-53            1/1     Running   0          48m
+```
+
