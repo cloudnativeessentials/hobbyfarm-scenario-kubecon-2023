@@ -68,14 +68,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 EOF
 ```
 
-2. Test the application
+6. Test the application
 ```ctr:harbor
 go run ~/simple-app/main.go
 ```
 
-3. Open a browser to test the application
+7. Open a browser to test the application
 <a href="http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080" target="_blank">http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080</a>
 
-4. Stop the program from running with ctrl+c
+8. Stop the program from running with ctrl+c
 
 
