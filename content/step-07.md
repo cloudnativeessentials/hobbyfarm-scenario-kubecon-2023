@@ -7,12 +7,12 @@ weight = 7
 
 1. Use `docker tag` to create an image to include your Harbor instance and cloudnativeessentials project.
 ```ctr:harbor
-docker tag simple-app:0.1 harbor.${vminfo:harbor:public_ip}.sslip.io/cloudnativeessentials/simple-app:0.1
+docker tag simple-app:0.1 harbor.${vminfo:harbor:public_ip}.sslip.io/cloudnativeessentials/simple-app:0.2
 ```
 2. Use `docker push` to push your container image to Harbor
 
 ```ctr:harbor
-docker push harbor.${vminfo:harbor:public_ip}.sslip.io/cloudnativeessentials/simple-app:0.1
+docker push harbor.${vminfo:harbor:public_ip}.sslip.io/cloudnativeessentials/simple-app:0.2
 ```
 
 Expected output:

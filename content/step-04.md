@@ -3,7 +3,7 @@ title = "Containerize an Application: Creating a Container Image"
 weight = 4
 +++
 
-Now we have a simple application, let's containerize it using the Docker tools.
+Now we have a simple application, let's containerize it using Docker tools.
 The `docker build` command creates container images using a Dockerfile.
 A Dockerfile is a text file with the commands to assemble a container image with a format of `INSTRUCTION argument`
 Each Dockerfile starts with the `FROM` instruction.
@@ -23,7 +23,7 @@ CMD [ "/simple-app" ]
 EOF
 ```
 
-2. Use `docker build` to create the container image
+2. Use `docker build` to create the simple-app:0.1 container image
 ```ctr:harbor
 docker build -t simple-app:0.1 ~/simple-app/.
 ```
@@ -91,3 +91,57 @@ docker run --name simple-app -p 8080:8080 --detach --rm simple-app:0.1
 docker stop simple-app
 ```
 
+7. The container image size is 885MB, let's reduce the size by using a multi-stage build
+```ctr:harbor
+cat <<EOF > ~/simple-app/Dockerfile
+FROM golang:1.21.3 AS BuildStage
+LABEL project=cloudnativeessentials
+WORKDIR /app
+COPY go.mod ./
+RUN go mod download
+COPY *.go ./
+RUN go build -o /simple-app
+EXPOSE 8080
+
+FROM alpine:3.18.4
+WORKDIR /
+COPY --from=BuildStage /simple-app /simple-app
+EXPOSE 8080
+CMD [ "/simple-app" ]
+EOF
+```
+
+8. Use `docker build` to create the simple-app:0.1 container image
+ ```ctr:harbor
+ docker build -t simple-app:0.2 ~/simple-app/.
+ ```
+
+Expected output:
+```shell
+```
+
+9. Check if the container image is available locally
+```ctr:harbor
+docker image ls
+```
+
+Expected output:
+```shell
+REPOSITORY                    TAG       IMAGE ID       CREATED              SIZE
+simple-app                    0.1       c451b4bdc00a   About a minute ago   885MB
+simple-app                    0.2       c451b4bdc00a   About a minute ago   885MB
+```
+
+10. Run a container from the new `simple-app:0.2` container image
+```ctr:harbor
+docker run --name simple-app -p 8080:8080 --detach --rm simple-app:0.2
+```
+
+11. Open a browser to test the application
+<a href="http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080" target="_blank">http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080</a>
+
+
+12. Stop the `simple-app` container
+```ctr:harbor
+docker stop simple-app
+```
