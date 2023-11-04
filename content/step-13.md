@@ -16,12 +16,24 @@ curl -sSL https://dl.k8s.io/release/stable.txt -w "\n"
 ```ctr:kubernetes
 RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
 ARCH="amd64"
+RELEASE_VERSION="v0.16.2"
+```
+
+```ctr:kubernetes
 cd $DOWNLOAD_DIR
 sudo curl -L --remote-name-all https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubelet}
 sudo chmod +x {kubeadm,kubelet}
-RELEASE_VERSION="v0.16.2"
+```
+
+```ctr:kubernetes
 curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /etc/systemd/system/kubelet.service
+```
+
+```ctr:kubernetes
 sudo mkdir -p /etc/systemd/system/kubelet.service.d
+```
+
+```ctr:kubernetes
 curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 cd ~
 ```

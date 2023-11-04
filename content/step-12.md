@@ -14,10 +14,14 @@ DOWNLOAD_DIR="/usr/local/bin"
 sudo mkdir -p "$DOWNLOAD_DIR"
 CRICTL_VERSION="v1.28.0"
 ARCH="amd64"
+```
+
+```ctr:kubernetes
 curl -L "https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz" | sudo tar -C $DOWNLOAD_DIR -xz
 ```
 
 Expected output:
+
 ```shell
 
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
@@ -26,7 +30,7 @@ Expected output:
 100 22.7M  100 22.7M    0     0  12.9M      0  0:00:01  0:00:01 --:--:-- 40.4M
 ```
 
-Test crictl
+2. Test crictl
 
 ```ctr:kubernetes
 crictl --version

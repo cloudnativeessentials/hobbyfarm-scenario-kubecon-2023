@@ -116,7 +116,6 @@ net.ipv4.ip_forward = 1
 
 ```ctr:kubernetes
 lsmod | grep br_netfilter
-lsmod | grep overlay
 ```
 
 Expected output:
@@ -124,6 +123,15 @@ Expected output:
 ```shell
 br_netfilter           32768  0
 bridge                331776  1 br_netfilter
+```
+
+```ctr:kubernetes
+lsmod | grep overlay
+```
+
+Expected output:
+
+```shell
 overlay               159744  0
 ```
 

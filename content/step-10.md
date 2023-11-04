@@ -174,6 +174,9 @@ Generate the default `config.toml`
 
 ```ctr:kubernetes
 sudo mkdir -p /etc/containerd
+```
+
+```ctr:kubernetes
 containerd config default | sudo tee /etc/containerd/config.toml
 ```
 
