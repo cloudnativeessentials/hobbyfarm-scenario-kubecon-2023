@@ -6,16 +6,19 @@ weight = 15
 # Create a cluster with kubeadm
 
 1. Do a dryrun with kubeadm to create a cluster
+
 ```ctr:kubernetes
 sudo kubeadm init --cri-socket=unix:///run/containerd/containerd.sock --dry-run
 ```
 
 2. If the dryrun is successful, continue with creating a cluster
+
 ```ctr:kubernetes
 sudo kubeadm init --cri-socket=unix:///run/containerd/containerd.sock
 ```
 
 Expected output:
+
 ```shell
 [init] Using Kubernetes version: v1.28.2
 [preflight] Running pre-flight checks
@@ -101,11 +104,13 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
 3. Test kubectl can retrieve the cluster info
+
 ```ctr:kubernetes
 kubectl cluster-info
 ```
 
 Expected output:
+
 ```shell
 Kubernetes control plane is running at https://172.31.42.53:6443
 CoreDNS is running at https://172.31.42.53:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
@@ -121,16 +126,19 @@ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 ```
 
 Expected output:
+
 ```
 node/${vminfo:kubernetes:hostname} untainted
 ```
 
 5. Check if the cluster is ready
+
 ```ctr:kubernetes
 kubectl get nodes
 ```
 
 Expected output:
+
 ```shell
 NAME              STATUS     ROLES           AGE   VERSION
 ${vminfo:kubernetes:hostname}   NotReady   control-plane   12m   v1.28.2

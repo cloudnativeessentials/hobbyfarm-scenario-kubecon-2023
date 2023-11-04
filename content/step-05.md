@@ -12,7 +12,7 @@ You installed Docker in a previous step.
 1. Docker Compose is a tool to run a multi-container application. The Harbor installer uses a Docker Compose file to start Harbor. Install Docker Compose:
 
 ```ctr:harbor
-sudo apt  install docker-compose -y
+sudo apt install docker-compose -y
 ```
 
 Expected output:
@@ -124,6 +124,7 @@ harbor-online-installer-v2.7.3.tgz.as 100%[=====================================
 ```
 
 2. Obtain the public key for the `asc` file
+
 ```ctr:harbor
 gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys 644FF454C0B4115C
 ```
@@ -207,18 +208,13 @@ openssl req -x509 -new -nodes -sha512 -days 365 \
 If you're curious about the `openssl req` options, checkout https://www.openssl.org/docs/man1.0.2/man1/openssl-req.html
 
 3. Generate a Server Certificate
+
 ```ctr:harbor
 openssl genrsa -out harbor.${vminfo:harbor:public_ip}.sslip.io.key 4096
 ```
 
-Expected output:
-```shell
-.............................................................................................................................................................................++++
-............................................++++
-e is 65537 (0x010001)
-```
-
 4. Generate a certificate signing request (CSR)
+
 ```ctr:harbor
 openssl req -sha512 -new \
 -subj "/C=CN/ST=Chicago/L=Chicago/O=kubecon/OU=cloudnativeessentials/CN=harbor.${vminfo:harbor:public_ip}.sslip.io" \
@@ -245,6 +241,7 @@ EOF
 ```
 
 6. Use the `v3.ext` file to generate a certificate for the Harbor instance
+
 ```ctr:harbor
 openssl x509 -req -sha512 -days 365 \
 -extfile v3.ext \
@@ -254,12 +251,14 @@ openssl x509 -req -sha512 -days 365 \
 ```
 
 Expected output:
+
 ```shell
 Certificate request self-signature ok
 subject=C = CN, ST = Chicago, L = Chicago, O = kubecon, OU = cloudnativeessentials, CN = harbor.${vminfo:harbor:public_ip}.sslip.io
 ```
 
 7. Copy the server certificate and key into the certificates folder
+
 ```ctr:harbor
 sudo mkdir -p /data/cert/
 sudo cp harbor.${vminfo:harbor:public_ip}.sslip.io.crt /data/cert/
@@ -283,6 +282,7 @@ sudo cp ca.crt /etc/docker/certs.d/harbor.${vminfo:harbor:public_ip}.sslip.io/
 ```
 
 10. Restart the container runtime (Docker)
+
 ```ctr:harbor
 sudo systemctl restart docker
 ```
@@ -307,11 +307,13 @@ sed -i 's@/your/certificate/path@/etc/docker/certs.d/harbor.${vminfo:harbor:publ
 ```
 
 4. Update the Harbor yaml file with your private key path
+
 ```ctr:harbor
 sed -i 's@/your/private/key/path@/etc/docker/certs.d/harbor.${vminfo:harbor:public_ip}.sslip.io/harbor.${vminfo:harbor:public_ip}.sslip.io.key@g' ~/harbor/harbor.yml
 ```
 
 5. On Ubuntu, trust the certificate at the OS level
+
 ```ctr:harbor
 sudo cp harbor.${vminfo:harbor:public_ip}.sslip.io.crt /usr/local/share/ca-certificates/harbor.${vminfo:harbor:public_ip}.sslip.io.crt
 sudo update-ca-certificates

@@ -11,6 +11,7 @@ Prometheus stores and collects metrics as time series data.
 Prometheus is a monitoring and alerting toolkit and is a CNCF graduated project.
 
 There are multiple ways to install Prometheus.
+
 The kube-prometheus-stack is a community-maintained helm chart that is a "batteries-included" chart that includes the following:
 - Prometheus Operator
 - Prometheus with Prometheus rules
@@ -21,16 +22,19 @@ The kube-prometheus-stack is a community-maintained helm chart that is a "batter
 - Grafana with dashboards
 
 1. Add the Prometheus community helm repository.
+
 ```ctr:kubernetes
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 ```
 
 Expected output:
+
 ```shell
 "prometheus-community" has been added to your repositories
 ```
 
 2. Update information of available charts locally from chart repositories
+
 ```ctr:kubernetes
 helm repo update
 ```
@@ -42,7 +46,8 @@ Hang tight while we grab the latest from your chart repositories...
 Update Complete. ⎈Happy Helming!⎈
 ```
 
-3. Install
+3. Use helm to install the kube-prometheus-stack 
+
 ```ctr:kubernetes
 helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
 --set alertmanager.service.type=NodePort \
@@ -59,6 +64,7 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
 ```
 
 Expected output:
+
 ```shell
 NAME: kube-prometheus-stack
 LAST DEPLOYED: Wed Oct 18 21:31:24 2023
@@ -79,6 +85,7 @@ kubectl --namespace kube-prometheus-stack get pods -l "release=kube-prometheus-s
 ```
 
 Expected output:
+
 ```shell
 NAME                                                        READY   STATUS    RESTARTS   AGE
 kube-prometheus-stack-kube-state-metrics-6bdd78dc74-4frg8   1/1     Running   0          44s
@@ -93,6 +100,7 @@ kubectl get services -n kube-prometheus-stack
 ```
 
 Expected output:
+
 ```shell
 NAME                                             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                         AGE
 alertmanager-operated                            ClusterIP   None            <none>        9093/TCP,9094/TCP,9094/UDP      13s

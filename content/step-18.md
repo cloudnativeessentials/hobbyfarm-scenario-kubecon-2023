@@ -15,11 +15,13 @@ Helm charts are stored in Helm repositories.
 You will use Helm to install several CNCF graduated projects later in this scenario.
 
 1. Install Helm
+
 ```ctr:kubernetes
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 ```
 
 Expected output:
+
 ```shell
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -31,11 +33,13 @@ helm installed into /usr/local/bin/helm
 ```
 
 2. Verify Helm install
+
 ```ctr:kubernetes
 helm version --client
 ```
 
 Expected output:
+
 ```shell
 version.BuildInfo{Version:"v3.13.1", GitCommit:"3547a4b5bf5edb5478ce352e18858d8a552a4110", GitTreeState:"clean", GoVersion:"go1.20.8"}
 ```

@@ -17,6 +17,7 @@ sudo apt-get update
 ```
 
 Exptected output:
+
 ```shell
 Hit:1 http://us-west-2.ec2.archive.ubuntu.com/ubuntu jammy InRelease
 Get:2 http://us-west-2.ec2.archive.ubuntu.com/ubuntu jammy-updates InRelease [119 kB]
@@ -27,12 +28,14 @@ Fetched 27.7 MB in 4s (6249 kB/s)
 Reading package lists... Done
 ```
 
-Run Docker installer
+Run Docker installer:
+
 ```ctr:harbor
 wget -qO- https://get.docker.com/ | sh
 ```
 
 Expected output:
+
 ```shell
 # Executing docker install script, commit: e5543d473431b782227f8908005543bb4389b8de
 + sudo -E sh -c apt-get update -qq >/dev/null
@@ -53,6 +56,7 @@ newgrp docker
 ```
 
 5. Verify Docker is running
+
 ```ctr:harbor
 docker version
 ```

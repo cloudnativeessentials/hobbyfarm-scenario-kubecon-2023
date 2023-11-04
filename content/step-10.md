@@ -17,6 +17,7 @@ wget https://github.com/containerd/containerd/releases/download/v1.7.7/container
 ```
 
 Expected output:
+
 ```shell
 --2023-10-17 20:08:23--  https://github.com/containerd/containerd/releases/download/v1.7.7/containerd-1.7.7-linux-amd64.tar.gz
 Resolving github.com (github.com)... 192.30.255.112
@@ -59,12 +60,14 @@ containerd-1.7.7-linux-amd64.tar.gz.s 100%[=====================================
 2023-10-17 20:08:51 (5.96 MB/s) - ‘containerd-1.7.7-linux-amd64.tar.gz.sha256sum’ saved [102/102]
 ```
 
-3. Verify the sha256 checksum.
+3. Verify the sha256 checksum
+
 ```ctr:kubernetes
 sha256sum -c containerd-1.7.7-linux-amd64.tar.gz.sha256sum
 ```
 
 Expected output:
+
 ```shell
 containerd-1.7.7-linux-amd64.tar.gz: OK
 ```
@@ -76,6 +79,7 @@ sudo tar Cxzvf /usr/local containerd-1.7.7-linux-amd64.tar.gz
 ```
 
 Expected output:
+
 ```shell
 bin/
 bin/containerd-shim-runc-v1
@@ -106,12 +110,14 @@ sudo systemctl enable --now containerd
 
 7. Install runc, verify its sha256sum, and install it as /usr/local/sbin/run
 
-Download runc.
+Download runc
+
 ```ctr:kubernetes
 wget https://github.com/opencontainers/runc/releases/download/v1.1.9/runc.amd64
 ```
 
 Expected output:
+
 ```shell
 --2023-10-17 20:15:07--  https://github.com/opencontainers/runc/releases/download/v1.1.9/runc.amd64
 Resolving github.com (github.com)... 192.30.255.113
@@ -155,21 +161,24 @@ runc.amd64.asc                        100%[=====================================
 2023-10-17 20:15:46 (46.0 MB/s) - ‘runc.amd64.asc’ saved [854/854]
 ```
 
-Install runc
+8. Install runc
+
 ```ctr:kubernetes
 sudo install -m 755 runc.amd64 /usr/local/sbin/runc
 ```
 
-8. containerd uses a configuration file called `config.toml` to specify dameon-level options.
+9. containerd uses a configuration file called `config.toml` to specify dameon-level options.
 The `config.toml` is located `/etc/containerd/config.toml`
 
 Generate the default `config.toml`
+
 ```ctr:kubernetes
 sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml
 ```
 
 Expected output:
+
 ```shell
 disabled_plugins = []
 imports = []
@@ -467,14 +476,15 @@ version = 2
   uid = 0
 ```
 
-9. Set the `systemd` cgroup driver with runc
+10. Set the `systemd` cgroup driver with runc
 Set the `SystemdCgroup` setting to true
 
 ```ctr:kubernetes
 sudo sed -i 's@SystemdCgroup = false@SystemdCgroup = true@g' /etc/containerd/config.toml
 ```
 
-10. Restart containerd
+11. Restart containerd
+
 ```ctr:kubernetes
 sudo systemctl restart containerd
 ```

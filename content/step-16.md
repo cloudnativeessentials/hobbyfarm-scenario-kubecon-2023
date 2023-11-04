@@ -6,6 +6,7 @@ weight = 16
 Install Cilium
 
 1. Install the latest Cilium CLI
+
 ```ctr:kubernetes
 CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
 CLI_ARCH=amd64
@@ -17,6 +18,7 @@ rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 ```
 
 Expected output
+
 ```shell
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -37,6 +39,7 @@ cilium install --version 1.14.2
 ```
 
 Expected output:
+
 ```shell
 ℹ️  Using Cilium version 1.14.2
 🔮 Auto-detected cluster name: kubernetes
@@ -44,11 +47,13 @@ Expected output:
 ```
 
 3. Validate the Cilium install
+
 ```ctr:kubernetes
 cilium status --wait
 ```
 
 Expected output:
+
 ```shell
     /¯¯\
  /¯¯\__/¯¯\    Cilium:             OK
@@ -74,6 +79,7 @@ cilium connectivity test
 ```
 
 Expected output:
+
 ```shell
 ℹ️  Single-node environment detected, enabling single-node connectivity test
 ℹ️  Monitor aggregation detected, will skip some flow validation steps
@@ -217,7 +223,8 @@ NAME              STATUS   ROLES           AGE   VERSION
 ${vminfo:kubernetes:hostname}   Ready    control-plane   25m   v1.28.2
 ```
 
-6. Kubernetes components
+6. Check the Kubernetes components running as Pods
+
 ```ctr:kubernetes
 kubectl get pods -n kube-system
 NAME                                      READY   STATUS    RESTARTS   AGE

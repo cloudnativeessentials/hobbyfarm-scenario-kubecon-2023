@@ -7,6 +7,7 @@ weight = 11
 # CNI installation
 
 CNI plugins are required to implement the Kubernetes network model.
+
 1. Install CNI plugins.
 
 ```ctr:kubernetes

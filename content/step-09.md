@@ -18,6 +18,7 @@ stat -fc %T /sys/fs/cgroup/
 ```
 
 Expected output:
+
 ```
 cgroup2fs
 ```
@@ -30,6 +31,7 @@ If the output is `tempfs` then cgroups v1 is used.
 
 2. Forwarding IPv4 and letting iptables see bridged traffic.
 Load the `overlay` and `br_netfilter` kernel modules in the current environment and set them to load on boot
+
 ```ctr:kubernetes
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 overlay
@@ -46,6 +48,7 @@ sudo modprobe br_netfilter
 ```
 
 4. Configure sysctl parameters to persist reboots
+
 ```ctr:kuberentes
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-iptables  = 1
@@ -55,6 +58,7 @@ EOF
 ```
 
 5. Apply sysctl parameters without rebooting
+
 ```ctr:kubernetes
 sudo sysctl --system
 ```
@@ -107,6 +111,7 @@ net.bridge.bridge-nf-call-ip6tables = 1
 net.ipv4.ip_forward = 1
 * Applying /etc/sysctl.conf ...
 ```
+
 6. Verify that the br_netfilter, overlay modules are loaded
 
 ```ctr:kubernetes
@@ -115,6 +120,7 @@ lsmod | grep overlay
 ```
 
 Expected output:
+
 ```shell
 br_netfilter           32768  0
 bridge                331776  1 br_netfilter
@@ -141,6 +147,7 @@ sudo apt install socat -y
 ```
 
 Expected output:
+
 ```shell
 Reading package lists... Done
 Building dependency tree... Done
@@ -179,6 +186,7 @@ sudo apt install conntrack -y
 ```
 
 Expected output:
+
 ```shell
 Reading package lists... Done
 Building dependency tree... Done

@@ -27,6 +27,7 @@ cd ~
 ```
 
 Expected output:
+
 ```shell
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -64,11 +65,13 @@ ExecStart=/usr/local/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $
 ```
 
 3. Enable and start kubelet
+
 ```ctr:kubernetes
 sudo systemctl enable --now kubelet
 ```
 
 Expected output:
+
 ```shell
 Created symlink /etc/systemd/system/multi-user.target.wants/kubelet.service → /etc/systemd/system/kubelet.service.
 ```
