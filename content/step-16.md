@@ -6,13 +6,15 @@ weight = 16
 # Observability: Metrics
 
 There are 3 pillars of observability: metrics, traces, and logs.
+Some add a fourth pillar, events.
+
 In this tutorial, you will install monitoring and logging solutions.
 Let's start with monitoring.
 
 Prometheus stores and collects metrics as time series data.
 Prometheus is a monitoring and alerting toolkit and is a CNCF graduated project.
 
-There are multiple ways to install Prometheus.
+There are multiple ways to install Prometheus. For this tutorial, we will install Prometheus via Helm.
 
 The kube-prometheus-stack is a community-maintained helm chart that is a "batteries-included" chart that includes the following:
 - Prometheus Operator
@@ -35,13 +37,14 @@ Expected output:
 "prometheus-community" has been added to your repositories
 ```
 
-2. Update information of available charts locally from chart repositories
+2. Update information of available charts locally from chart repositories.
 
 ```ctr:kubernetes
 helm repo update
 ```
 
 Expected output:
+
 ```shell
 Hang tight while we grab the latest from your chart repositories...
 ...Successfully got an update from the "prometheus-community" chart repository
@@ -124,6 +127,3 @@ Run a few PromQL queries in the browers:
 8. To access Grafana go to your node's IP on port 30140, <a href="http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30140" target="_blank">http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30140 </a> and use the default admin credentials: username = `admin`, password = `prom-operator`
 
 9. From the hamburger menu in the top left, go to Dashboards and checkout a dashboard like the `Kubernetes/Kubelet` dashboard
-
-
-

@@ -8,13 +8,14 @@ weight = 15
 Helm is Kubernetes package manager and a CNCF graduated project. Helm helps you manage applications.
 
 Helm charts are the packaging format. A chart are files in a particulary directory structure that describe related Kubernetes resources.
+
 A chart can be used to deploy something simple like a single Pod with a single container or complex like an application composed of an HTTP server, database, caches, etc.
 
 Helm charts are stored in Helm repositories.
 
 You will use Helm to install several CNCF graduated projects later in this scenario.
 
-1. Install Helm
+1. Install Helm.
 
 ```ctr:kubernetes
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
@@ -32,7 +33,7 @@ Preparing to install helm into /usr/local/bin
 helm installed into /usr/local/bin/helm
 ```
 
-2. Verify Helm install
+2. Verify Helm install.
 
 ```ctr:kubernetes
 helm version --client

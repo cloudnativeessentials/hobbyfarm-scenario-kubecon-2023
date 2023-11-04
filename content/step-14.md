@@ -10,7 +10,7 @@ With our Kubernetes cluster ready, let's deploy basic Kubernetes resources
 ## Namespace
 
 1. A namespace isolates a group of resources within a Kubernetes cluster.
-Create a new namespace `my-namespace`
+Create a new namespace `my-namespace`.
 
 ```ctr:kubernetes
 kubectl create namespace my-namespace
@@ -38,7 +38,7 @@ Expected output:
 pod/nginx created
 ```
 
-3. Find the Pod's virtual IP and test access to the nginx container:
+3. Find the Pod's virtual IP and test access to the nginx container.
 
 ```ctr:kubernetes
 kubectl get pods -o wide -n my-namespace
@@ -51,7 +51,7 @@ NAME    READY   STATUS    RESTARTS   AGE   IP          NODE              NOMINAT
 nginx   1/1     Running   0          83s   <VIP>       <hostname>   <none>           <none>
 ```
 
-4. Curl the nginx container on the Virtual IP, the command below is not click-to-run since you have to enter the Pod's VIP
+4. Curl the nginx container on the Virtual IP, the command below is not click-to-run since you have to enter the Pod's VIP.
 
 ```
 curl -sk http://<VIP> | head -n 4
@@ -86,6 +86,7 @@ A Deployment is a Kubernetes resource that provides declartive updates at a cont
 This time you will use a Kubernetes manifest to deploy a Deployment.
 
 6. Create a Kubernetes manifest for a Deployment in the `my-namespace` namespace for two replicas of Pod that runs the nginx webserver.
+
 This time give the `app=nginx` labels to the Deployment and Pods of the Deployment so we can group and identify the Pods in a later step.
 
 ```ctr:kubernetes
@@ -116,7 +117,7 @@ spec:
 EOF
 ```
 
-7. Use `kubectl apply` to apply the configuration from the deployment.yaml manifest
+7. Use `kubectl apply` to apply the configuration from the deployment.yaml manifest.
 
 ```ctr:kubernetes
 kubectl apply -f ~/manifests/deployment.yaml
@@ -128,7 +129,7 @@ Expected output:
 deployment.apps/nginx created
 ```
 
-8. Check the status of the Deployment
+8. Check the status of the Deployment.
 
 ```ctr:kubernetes
 kubectl get deployment -n my-namespace
@@ -141,7 +142,7 @@ NAME    READY   UP-TO-DATE   AVAILABLE   AGE
 nginx   2/2     2            2           30s
 ```
 
-9. Check the Pods of the deployment
+9. Check the Pods of the deployment.
 
 ```ctr:kubernetes
 kubectl get pods -n my-namespace -o wide
@@ -152,8 +153,10 @@ With 2 replicas of the nginx webserver running, let's expose the Pods of the Dep
 ## Services
 
 A Service abstracts a group of Pods over a network using a label selector identify the Pods to expose.
+
 There are multiple types of Kubernetes Services, we will use the NodePort service to expose the Service on each Node's IP of a cluster.
-By default, a NodePort exposes the Service in the port range of 30000 to 32767
+
+By default, a NodePort exposes the Service in the port range of 30000 to 32767.
 
 Expose the Pods of the nginx Deployment to be reachable with your browser.
 
@@ -176,7 +179,7 @@ spec:
 EOF
 ```
 
-11. Apply the service.yaml manifest to create the Service
+11. Apply the service.yaml manifest to create the Service.
 
 ```ctr:kubernetes
 kubectl apply -f ~/manifests/service.yaml
@@ -188,15 +191,15 @@ Expected output:
 service/nginx-service created
 ```
 
-12. Check if the Service was created
+12. Check the Service was created.
 
 ```ctr:kubernetes
 kubectl get service -n my-namespace
 ```
 
 13. Use your browser to test access to the nginx webserver
-<a href="http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30000" target="_blank">http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30000</a>
+<a href="http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30000" target="_blank">http://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30000</a>.
 
-You should see `Welcome to nginx~`
+You should see `Welcome to nginx~`.
 
 At the end of this step, you've successfully deployed 2 replicas of an application container with a Pod and Deployment and exposed the application with a Service type NodePort.
