@@ -12,7 +12,7 @@ Each Dockerfile starts with the `FROM` instruction.
 
 ```ctr:harbor
 cat <<EOF > ~/simple-app/Dockerfile
-FROM golang:1.21.0
+FROM golang:1.21-alpine3.17
 LABEL project=cloudnativeessentials
 WORKDIR /app
 COPY *.go ./
@@ -31,38 +31,34 @@ docker build -t simple-app:0.1 ~/simple-app/.
 
 Expected output:
 ```shell
-[+] Building 54.2s (10/10) FINISHED                                                                                                      docker:default
+[+] Building 35.1s (10/10) FINISHED                                                                                                      docker:default
  => [internal] load build definition from Dockerfile                                                                                               0.0s
- => => transferring dockerfile: 209B                                                                                                               0.0s
- => [internal] load .dockerignore                                                                                                                  0.1s
+ => => transferring dockerfile: 218B                                                                                                               0.0s
+ => [internal] load .dockerignore                                                                                                                  0.0s
  => => transferring context: 2B                                                                                                                    0.0s
- => [internal] load metadata for docker.io/library/golang:1.21.0                                                                                   1.3s
- => [1/5] FROM docker.io/library/golang:1.21.0@sha256:b490ae1f0ece153648dd3c5d25be59a63f966b5f9e1311245c947de4506981aa                            24.3s
- => => resolve docker.io/library/golang:1.21.0@sha256:b490ae1f0ece153648dd3c5d25be59a63f966b5f9e1311245c947de4506981aa                             0.0s
- => => sha256:434a1905832963ddddafdfb5a8f329a0c0b78a3529c99d57259f0888e0feb973 7.06kB / 7.06kB                                                     0.0s
- => => sha256:de4cac68b6165c40cf6f8b30417948c31be03a968e233e55ee40221553a5e570 49.56MB / 49.56MB                                                   1.9s
- => => sha256:d31b0195ec5f04dfc78eca9d73b5d223fc36a29f54ee888bc4e0615b5839e692 24.03MB / 24.03MB                                                   1.4s
- => => sha256:12359f96c43077803959dab88ce60c87cd2543f3b907bf54a34a5104270f404f 1.58kB / 1.58kB                                                     0.0s
- => => sha256:9b1fd34c30b75e7edb20c2fd09a9862697f302ef9ae357e521ef3c84d5534e3f 64.11MB / 64.11MB                                                   3.4s
- => => sha256:b490ae1f0ece153648dd3c5d25be59a63f966b5f9e1311245c947de4506981aa 2.36kB / 2.36kB                                                     0.0s
- => => extracting sha256:de4cac68b6165c40cf6f8b30417948c31be03a968e233e55ee40221553a5e570                                                          4.5s
- => => sha256:661ee9827c7b967875eb48447f68fc66ca426a6067f385d1ce553a927a20c8ff 66.87MB / 66.87MB                                                   6.0s
- => => sha256:2f744fb50e06fe7e56d42f6f0776b4b6041b65ef9435c1982e66d5a477047682 92.27MB / 92.27MB                                                   6.3s
- => => sha256:fa5c1764d69475fa335ef99e53c3a89552eabb243701101eed02eb42d90220df 155B / 155B                                                         3.5s
- => => extracting sha256:d31b0195ec5f04dfc78eca9d73b5d223fc36a29f54ee888bc4e0615b5839e692                                                          0.9s
- => => extracting sha256:9b1fd34c30b75e7edb20c2fd09a9862697f302ef9ae357e521ef3c84d5534e3f                                                          3.9s
- => => extracting sha256:2f744fb50e06fe7e56d42f6f0776b4b6041b65ef9435c1982e66d5a477047682                                                          4.1s
- => => extracting sha256:661ee9827c7b967875eb48447f68fc66ca426a6067f385d1ce553a927a20c8ff                                                          6.9s
- => => extracting sha256:fa5c1764d69475fa335ef99e53c3a89552eabb243701101eed02eb42d90220df                                                          0.0s
+ => [internal] load metadata for docker.io/library/golang:1.21-alpine3.17                                                                          1.1s
+ => [1/5] FROM docker.io/library/golang:1.21-alpine3.17@sha256:6e069c2467a974f2b77ebee687d820d864e9632d2c606bd7e8478b2be437678e                    8.2s
+ => => resolve docker.io/library/golang:1.21-alpine3.17@sha256:6e069c2467a974f2b77ebee687d820d864e9632d2c606bd7e8478b2be437678e                    0.0s
+ => => sha256:a1ef7ce3344464e5090f7a329df2dfd9bb5025b01275806248dba373a82c2413 284.93kB / 284.93kB                                                 0.2s
+ => => sha256:da8cd8fd6e936ae489ee166bf78cbf91a29edeaa0bf7ae97fa2314c7cca723a8 67.02MB / 67.02MB                                                   1.1s
+ => => sha256:6e069c2467a974f2b77ebee687d820d864e9632d2c606bd7e8478b2be437678e 1.65kB / 1.65kB                                                     0.0s
+ => => sha256:06cb1dae8604f1655f089bb3dd210a8123e0c9deaca78033f4629979ed316337 1.16kB / 1.16kB                                                     0.0s
+ => => sha256:a9912e40f99f02b22dc040191ae0d85fc96cb4389a8ba9b81657cad47497d818 6.32kB / 6.32kB                                                     0.0s
+ => => sha256:9398808236ffac29e60c04ec906d8d409af7fa19dc57d8c65ad167e9c4967006 3.38MB / 3.38MB                                                     0.2s
+ => => extracting sha256:9398808236ffac29e60c04ec906d8d409af7fa19dc57d8c65ad167e9c4967006                                                          0.2s
+ => => sha256:17e1d6a3935137abe8d550b4a284cdd9887a117482e27a1ac714d4993d71d501 155B / 155B                                                         0.3s
+ => => extracting sha256:a1ef7ce3344464e5090f7a329df2dfd9bb5025b01275806248dba373a82c2413                                                          0.1s
+ => => extracting sha256:da8cd8fd6e936ae489ee166bf78cbf91a29edeaa0bf7ae97fa2314c7cca723a8                                                          6.6s
+ => => extracting sha256:17e1d6a3935137abe8d550b4a284cdd9887a117482e27a1ac714d4993d71d501                                                          0.0s
  => [internal] load build context                                                                                                                  0.0s
- => => transferring context: 457B                                                                                                                  0.0s
- => [2/5] WORKDIR /app                                                                                                                             3.3s
+ => => transferring context: 29B                                                                                                                   0.0s
+ => [2/5] WORKDIR /app                                                                                                                             1.1s
  => [3/5] COPY *.go ./                                                                                                                             0.0s
- => [4/5] RUN go mod init simple-app                                                                                                               0.4s
- => [5/5] RUN go build -o /simple-app                                                                                                             24.0s
- => exporting to image                                                                                                                             0.6s 
- => => exporting layers                                                                                                                            0.6s 
- => => writing image sha256:47be40421214074538fb1e129da6a117c4aab58d9f249c8566daa9cc7e2454fb                                                       0.0s
+ => [4/5] RUN go mod init simple-app                                                                                                               0.3s
+ => [5/5] RUN go build -o /simple-app                                                                                                             23.6s
+ => exporting to image                                                                                                                             0.7s
+ => => exporting layers                                                                                                                            0.7s
+ => => writing image sha256:f261baa9126a6e0fca3bdf9c87ee8d4d5e5f0d8147aa39270bcc23bf9a1b0e90                                                       0.0s
  => => naming to docker.io/library/simple-app:0.1                                                                                                  0.0s
 ```
 
@@ -76,7 +72,7 @@ Expected output:
 
 ```shell
 REPOSITORY                    TAG       IMAGE ID       CREATED              SIZE
-simple-app                    0.1       c451b4bdc00a   About a minute ago   884MB
+simple-app                    0.1       c451b4bdc00a   About a minute ago   291MB
 ```
 
 4. Run a container from the new `simple-app:0.1` container image
