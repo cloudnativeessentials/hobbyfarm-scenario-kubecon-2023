@@ -19,7 +19,7 @@ stat -fc %T /sys/fs/cgroup/
 
 Expected output:
 
-```
+```shell
 cgroup2fs
 ```
 
@@ -44,6 +44,9 @@ The `br_netfilter` module enables transparent masquerading and facilitate Virtua
 
 ```ctr:kubernetes
 sudo modprobe overlay
+```
+
+```ctr:kubernetes
 sudo modprobe br_netfilter
 ```
 
@@ -64,6 +67,7 @@ sudo sysctl --system
 ```
 
 Expected output:
+
 ```shell
 * Applying /etc/sysctl.d/10-console-messages.conf ...
 kernel.printk = 4 4 1 7
@@ -142,6 +146,7 @@ sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables ne
 ```
 
 Expected output:
+
 ```shell
 net.bridge.bridge-nf-call-iptables = 1
 net.bridge.bridge-nf-call-ip6tables = 1
@@ -156,7 +161,7 @@ sudo apt install socat -y
 
 Expected output:
 
-```shell
+```
 Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done

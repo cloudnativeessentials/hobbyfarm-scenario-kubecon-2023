@@ -143,6 +143,7 @@ wget https://github.com/opencontainers/runc/releases/download/v1.1.9/runc.amd64.
 ```
 
 Expected output:
+
 ```shell
 --2023-10-17 20:15:45--  https://github.com/opencontainers/runc/releases/download/v1.1.9/runc.amd64.asc
 Resolving github.com (github.com)... 192.30.255.112
@@ -491,6 +492,3 @@ sudo sed -i 's@SystemdCgroup = false@SystemdCgroup = true@g' /etc/containerd/con
 ```ctr:kubernetes
 sudo systemctl restart containerd
 ```
-
-
-
