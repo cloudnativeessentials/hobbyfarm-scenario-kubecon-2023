@@ -39,8 +39,17 @@ Expected output:
 
 ```ctr:kubernetes
 DOWNLOAD_DIR="/usr/local/bin"
+```
+
+```ctr:kubernetes
 sudo mkdir -p "$DOWNLOAD_DIR"
+```
+
+```ctr:kubernetes
 CRICTL_VERSION="v1.28.0"
+```
+
+```ctr:kubernetes
 ARCH="amd64"
 ```
 
