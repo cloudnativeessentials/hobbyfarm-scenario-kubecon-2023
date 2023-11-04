@@ -9,26 +9,7 @@ Although Docker is not a CNCF project, it was the project that popularized conta
 
 ## Install Docker
 
-1. Install Docker
-
-```ctr:harbor
-sudo mkdir -p /etc/docker
-sudo apt-get update
-```
-
-Exptected output:
-
-```shell
-Hit:1 http://us-west-2.ec2.archive.ubuntu.com/ubuntu jammy InRelease
-Get:2 http://us-west-2.ec2.archive.ubuntu.com/ubuntu jammy-updates InRelease [119 kB]
-Get:3 http://us-west-2.ec2.archive.ubuntu.com/ubuntu jammy-backports InRelease [109 kB]
-...
-Get:42 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 c-n-f Metadata [260 B]
-Fetched 27.7 MB in 4s (6249 kB/s)               
-Reading package lists... Done
-```
-
-Run Docker installer:
+1. Run Docker installer:
 
 ```ctr:harbor
 wget -qO- https://get.docker.com/ | sh
