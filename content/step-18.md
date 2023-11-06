@@ -8,10 +8,10 @@ weight = 18
 Open Policy Agent (OPA) is a policy engine with policy-as-code and a CNCF graduated project.
 OPA is used to enforce policies in cloud native environments.
 
-Gatekeeper is a validating and mutating webhook that enforces CRD-based policies executed by Open Policy Agent.
+OPA Gatekeeper is a customizable admission webhook that enforces policies executed by OPA. 
+With Gatekeeper, users can customize admission control configuration easier.
 
-
-With Gatekeeper, you can enforce policies like container images must be pulled from a specific container registry or not allow privilege escalation in containers.
+With OPA Gatekeeper, you can enforce policies like container images must be pulled from a specific container registry or not allow privilege escalation in containers.
 
 1. Add the Gatekeeper helm repo.
 
