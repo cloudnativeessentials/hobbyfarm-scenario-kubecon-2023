@@ -25,78 +25,19 @@ Fluent Bit has native support for environmental metric collection.
 
 The use of both Fluent Bit and Fluentd optimizes resource consumption on the nodes with Fluent Bit's smaller footprint and optimizes the flexibilty of Fluentd with more than 700 plugins available.
 
-For this tutorial, we'll use Fluentd to collect application logs.
-
-1. Add the fluent helm repo
-
-```ctr:kubernetes
-helm repo add fluent https://fluent.github.io/helm-charts
-helm repo update
-```
-
-Expected output:
-```shell
-"fluent" has been added to your repositories
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "fluent" chart repository
-...Successfully got an update from the "prometheus-community" chart repository
-Update Complete. ⎈Happy Helming!⎈
-```
-
-2. Install fluentd with the release name of fluentd in the fluentd namespace
-
-```ctr:kubernetes
-helm install fluentd fluent/fluentd --namespace kube-system --set variant=elasticsearch8
-```
-
-Expected output
-```shell
-NAME: fluentd
-LAST DEPLOYED: Thu Nov  2 07:01:33 2023
-NAMESPACE: kube-system
-STATUS: deployed
-REVISION: 1
-NOTES:
-Get Fluentd build information by running these commands:
-
-export POD_NAME=$(kubectl get pods --namespace kube-system -l "app.kubernetes.io/name=fluentd,app.kubernetes.io/instance=fluentd" -o jsonpath="{.items[0].metadata.name}")
-kubectl --namespace kube-system port-forward $POD_NAME 24231:24231
-curl http://127.0.0.1:24231/metrics
-```
-
-fluentd is deployed as a DaemonSet resource. A DaemonSet ensures a Pod of the DaemonSet runs on all nodes of the cluster.
-
-Check the fleuntd DaemonSet is running
-```ctr:kubernetes
-kubectl get daemonset -n fluentd
-```
-
-Expected output:
-```shell
-NAME      DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
-fluentd   1         1         0       1            0           <none>          3m25s
-```
-
-By default the DaemonSet is configured with Elasticsearch as the fluentd output.
-You can verify with the container image 
-```ctr:kubernetes
-kubectl get ds fluentd -n fluentd -o yaml | grep image:
-```
-
-Expected output:
-```shell
-    image: fluent/fluentd-kubernetes-daemonset:v1.16.2-debian-elasticsearch7-1.0
-```
-
+For this tutorial, we'll use Fluentd to collect logs
 
 ## Install Elasticsearch, Logstash, and Kibana 
 
-The default output for the fluentd helm chart is elasticsearch.
+We will first install Elasticsearch, Logstash, and Kibana aka the ELK stack as the logging backend for fluentd to send logs to.
+
 We will install the following:
   - Elasticsearch which is a search/analytics engine and a log analytics tool
   - Logstash to collect logs and send to Elasticsearch for storage and analysis
   - Filebeat to 
   - Kibana to visualize the data stored in Elasticsearch
+
+1. Add the elastic helm repo.
 
 ```ctr:kubernetes
 helm repo add elastic https://helm.elastic.co
@@ -104,6 +45,7 @@ helm repo update
 ```
 
 Expected output:
+
 ```shell
 "elastic" has been added to your repositories
 Hang tight while we grab the latest from your chart repositories...
@@ -113,16 +55,15 @@ Hang tight while we grab the latest from your chart repositories...
 Update Complete. ⎈Happy Helming!⎈
 ```
 
-## Install Elasticsearch, Logstash, and Kibana 
 
-By default, the fluentd helm chart 
+2. Install Elasticsearch.
 
-Install Elasticsearch
 ```ctr:kubernetes
 helm install elasticsearch elastic/elasticsearch --set replicas=1 --set minimumMasterNodes=1 --set secret.password=changeme --set resources.requests.cpu=100m --set resources.requests.memory=100Mi --set persistence.enabled=false -n elk --create-namespace
 ```
 
 Expected output:
+
 ```shell
 NAME: elasticsearch
 LAST DEPLOYED: Thu Nov  2 04:28:58 2023
@@ -152,12 +93,14 @@ elasticsearch-master-0   1/1     Running   0          2m19s
 
 Wait until the `elasticsearch-master-0` is ready before proceeding.
 
-Install Logstash
+3. Install Logstash
+
 ```ctr:kubernetes
 helm install logstash elastic/logstash -n elk
 ```
 
 Expected output:
+
 ```shell
 NAME: logstash
 LAST DEPLOYED: Thu Nov  2 05:42:26 2023
@@ -170,7 +113,8 @@ NOTES:
   $ kubectl get pods --namespace=elk -l app=logstash-logstash -w
 ```
 
-Wait until the logstash pod is ready before proceeding
+Wait until the logstash Pod is ready before proceeding.
+
 ```ctr:kubernetes
 kubectl get pods --namespace=elk -l app=logstash-logstash
 ```
@@ -181,15 +125,14 @@ NAME                  READY   STATUS    RESTARTS   AGE
 logstash-logstash-0   1/1     Running   0          94s
 ```
 
-Install Filebeat
+4. Install Kibana.
 
-
-Install Kibana
 ```ctr:kubernetes
 helm install kibana elastic/kibana --set resources.requests.cpu=100m --set resources.requests.memory=100Mi --set service.type=NodePort --set service.nodePort=30001 -n elk
 ```
 
 Expected output:
+
 ```shell
 NAME: kibana
 LAST DEPLOYED: Thu Nov  2 05:48:14 2023
@@ -207,48 +150,85 @@ NOTES:
 ```
 
 Wait until the kibana Pod is ready before proceeding
+
 ```ctr:kubernetes
 kubectl get pods -n elk -l app=kibana
 ```
 
 Expected output:
+
 ```shell
 NAME                             READY   STATUS    RESTARTS   AGE
 kibana-kibana-6888db469c-djkv7   1/1     Running   0          111s
 ```
 
-Use your browser to access kibana
+Use your browser to access Kibana
 <a href="https://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30001" target="_blank">https://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30001</a>
 
 Login in with the username = `elastic`, password = `changeme`
 
 
----
-fluent operator
+## fluentd 
+
+5. Create the required ServiceAccount, ClusterRole, ClusterRoleBinding for fluentd.
 
 ```ctr:kubernetes
-helm install fluent-operator fluent/fluent-operator --create-namespace -n fluent --set containerRuntime=containerd --set es.enable=true --set es.host=http://elasticsearch-master.elk.svc.cluster.local:9200
+cat <<EOF > ~/manifests/fluentd-rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluentd
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fluentd
+  namespace: kube-system
+rules:
+- apiGroups: [""]
+  resources:
+  - pods
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: fluentd
+roleRef:
+  kind: ClusterRole
+  name: fluentd
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: fluentd
+  namespace: kube-system
+EOF
+```
+
+6. Apply the manifest.
+
+```ctr:kubernetes
+kubectl apply -f ~/manifests/fluentd-rbac.yaml
 ```
 
 Expected output:
-```shell
-NAME: fluent-operator
-LAST DEPLOYED: Thu Nov  2 07:18:26 2023
-NAMESPACE: fluent
-STATUS: deployed
-REVISION: 1
-TEST SUITE: None
-NOTES:
-Thank you for installing  fluent-operator
-Your release is named    fluent-operator
 
-To learn more about the release ,try:
-   $ helm status  fluent-operator  -n  fluent
-   $ helm get  fluent-operator  -n fluent
+```shell
+serviceaccount/fluentd created
+clusterrole.rbac.authorization.k8s.io/fluentd created
+clusterrolebinding.rbac.authorization.k8s.io/fluentd created
 ```
 
+
+7. Create the manifest for the fluentd DaemonSet.
+
 ```ctr:kubernetes
-cat <<EOF > ~/manifests/fluentd.yaml
+cat <<EOF > ~/manifests/fluentd-ds.yaml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -268,56 +248,62 @@ spec:
         k8s-app: fluentd-logging
         version: v1
     spec:
+      serviceAccount: fluentd
+      serviceAccountName: fluentd
       tolerations:
-      - key: node-role.kubernetes.io/control-plane
-        effect: NoSchedule
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
       containers:
       - name: fluentd
-        image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch
+        image: fluent/fluentd-kubernetes-daemonset:elasticsearch
         env:
-          - name: K8S_NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          - name:  FLUENT_ELASTICSEARCH_HOST
-            value: "elasticsearch-master.elk.svc.cluster.local"
-          - name:  FLUENT_ELASTICSEARCH_PORT
-            value: "9200"
-          - name: FLUENT_ELASTICSEARCH_SCHEME
-            value: "http"
-          - name: FLUENT_ELASTICSEARCH_SSL_VERIFY
-            value: "true"
-          - name: FLUENT_ELASTICSEARCH_SSL_VERSION
-            value: "TLSv1_2"
-          - name: FLUENT_ELASTICSEARCH_USER
-            value: "elastic"
-          - name: FLUENT_ELASTICSEARCH_PASSWORD
-            value: "changeme"
-          - name: LOGZIO_TOKEN
-            value: "ThisIsASuperLongToken"
-          - name: LOGZIO_LOGTYPE
-            value: "kubernetes"
+        - name:  FLUENT_ELASTICSEARCH_HOST
+          value: "elasticsearch-master.elk.svc.cluster.local"
+        - name:  FLUENT_ELASTICSEARCH_PORT
+          value: "9200"
+        - name: FLUENT_ELASTICSEARCH_SCHEME
+          value: "http"
+        - name: FLUENT_UID
+          value: "0"
+        # X-Pack Authentication
+        # =====================
+        - name: FLUENT_ELASTICSEARCH_USER
+          value: "elastic"
+        - name: FLUENT_ELASTICSEARCH_PASSWORD
+          value: "changeme"
         resources:
           limits:
             memory: 200Mi
           requests:
             cpu: 100m
-            memory: 100Mi
+            memory: 200Mi
         volumeMounts:
         - name: varlog
           mountPath: /var/log
-        - name: dockercontainerlogdirectory
-          mountPath: /var/log/pods
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
           readOnly: true
       terminationGracePeriodSeconds: 30
       volumes:
       - name: varlog
         hostPath:
           path: /var/log
-      - name: dockercontainerlogdirectory
+      - name: varlibdockercontainers
         hostPath:
-          path: /var/log/pods
+          path: /var/lib/docker/containers
 EOF
 ```
+
+8. Apply the manifest.
+
+```ctr:kubernetes
+kubectl apply -f ~/manifests/fluentd-ds.yaml
+```
+
+Expected output:
+
+```shell
+daemonset.apps/fluentd created
+```
+
+9. Navigate to the kibana UI > Management > Index Management to see a new Logstash index generated by the fluentd DaemonSet.
