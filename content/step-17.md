@@ -5,7 +5,6 @@ weight = 17
 
 # Logging
 
-Part of the 12 factor app is to send logs to stdout.
 You can gather logs from containers with the `kubectl -n <namespace> logs <pod name> -c <container name if multiple containers in pod>` command.
 
 An application may use multiple containers and it'll be difficult to obtain logs through single containers.
