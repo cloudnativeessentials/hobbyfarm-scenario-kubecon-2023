@@ -20,10 +20,6 @@ Fluent Bit excels in highly distributed environment and has a smaller footprint 
 
 Fluent Bit is not as flexible as Fluentd. Fluent Bit has about 45 plugins versus Fluentd has about 700 plugins.
 
-Fluent Bit has native support for environmental metric collection.
-
-The use of both Fluent Bit and Fluentd optimizes resource consumption on the nodes with Fluent Bit's smaller footprint and optimizes the flexibilty of Fluentd with more than 700 plugins available.
-
 For this tutorial, we'll use Fluentd to collect logs
 
 ## Install Elasticsearch, Logstash, and Kibana 
@@ -33,7 +29,6 @@ We will first install Elasticsearch, Logstash, and Kibana aka the ELK stack as t
 We will install the following:
   - Elasticsearch which is a search/analytics engine and a log analytics tool
   - Logstash to collect logs and send to Elasticsearch for storage and analysis
-  - Filebeat to 
   - Kibana to visualize the data stored in Elasticsearch
 
 1. Add the elastic helm repo.
