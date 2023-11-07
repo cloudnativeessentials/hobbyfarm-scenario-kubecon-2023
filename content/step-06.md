@@ -53,6 +53,7 @@ docker run --name simple-app -p 8080:8080 --detach --rm harbor.${vminfo:harbor:p
 
 6. Open a browser to test the application <a href="http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080" target="_blank">http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080</a>
 
+
 7. Stop the `simple-app` container
 
 ```ctr:harbor
