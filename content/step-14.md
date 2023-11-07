@@ -18,7 +18,7 @@ kubectl create namespace my-namespace
 
 Expected output:
 
-```
+```shell | 
 namespace/my-namespace created
 ```
 
@@ -40,26 +40,15 @@ pod/nginx created
 
 3. Find the Pod's virtual IP and test access to the nginx container.
 
+We obtain the Pod's virtual IP by using a `jsonpath` output - this allows us to format information about the pod to suit our needs.
+
 ```ctr:kubernetes
-kubectl get pods -o wide -n my-namespace
+kubectl get pods/nginx -n my-namespace -o jsonpath='{.status.podIP}' | xargs -I {} curl -sk http://{} | head -n 4
 ```
 
 Expected output:
 
-```shell
-NAME    READY   STATUS    RESTARTS   AGE   IP          NODE              NOMINATED NODE   READINESS GATES
-nginx   1/1     Running   0          83s   <VIP>       <hostname>   <none>           <none>
-```
-
-4. Curl the nginx container on the Virtual IP, the command below is not click-to-run since you have to enter the Pod's VIP.
-
-```
-curl -sk http://<VIP> | head -n 4
-```
-
-Expected output:
-
-```
+```html
 <!DOCTYPE html>
 <html>
 <head>

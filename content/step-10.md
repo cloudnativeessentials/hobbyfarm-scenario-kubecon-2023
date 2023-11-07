@@ -14,9 +14,9 @@ curl -sSL https://dl.k8s.io/release/stable.txt -w "\n"
 2. Install kubeadm, kubelet, and kubelet systemd service.
 
 ```ctr:kubernetes
-RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
-ARCH="amd64"
-RELEASE_VERSION="v0.16.2"
+export RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
+export ARCH="amd64"
+export RELEASE_VERSION="v0.16.2"
 ```
 
 ```ctr:kubernetes

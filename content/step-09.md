@@ -38,19 +38,13 @@ Expected output:
 2. Install `crictl`:
 
 ```ctr:kubernetes
-DOWNLOAD_DIR="/usr/local/bin"
+export DOWNLOAD_DIR="/usr/local/bin"
+export CRICTL_VERSION="v1.28.0"
+export ARCH="amd64"
 ```
 
 ```ctr:kubernetes
 sudo mkdir -p "$DOWNLOAD_DIR"
-```
-
-```ctr:kubernetes
-CRICTL_VERSION="v1.28.0"
-```
-
-```ctr:kubernetes
-ARCH="amd64"
 ```
 
 ```ctr:kubernetes

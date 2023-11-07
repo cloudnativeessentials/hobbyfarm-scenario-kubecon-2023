@@ -8,8 +8,8 @@ Install Cilium
 1. Install the latest Cilium CLI
 
 ```ctr:kubernetes
-CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
-CLI_ARCH=amd64
+export CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+export CLI_ARCH=amd64
 if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
 curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
@@ -17,17 +17,9 @@ sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
 rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 ```
 
-Expected output
+Expected output should end with:
 
 ```shell
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 34.5M  100 34.5M    0     0  28.6M      0  0:00:01  0:00:01 --:--:-- 97.0M
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100    92  100    92    0     0    305      0 --:--:-- --:--:-- --:--:--   305
 cilium-linux-amd64.tar.gz: OK
 cilium
 ```
@@ -51,6 +43,8 @@ Expected output:
 ```ctr:kubernetes
 cilium status --wait
 ```
+
+> This command will take a moment to complete. 
 
 Expected output:
 

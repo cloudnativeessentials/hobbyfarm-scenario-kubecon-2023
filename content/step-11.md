@@ -13,28 +13,10 @@ kubectl is the Kubernetes cli tool and allows you to run commands against Kubern
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 ```
 
-Expected output:
-
-```shell
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100   138  100   138    0     0    774      0 --:--:-- --:--:-- --:--:--   775
-100 47.5M  100 47.5M    0     0  48.0M      0 --:--:-- --:--:-- --:--:--  114M
-```
-
 2. Download the kubectl checksum file
 
 ```ctr:kubernetes
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
-```
-
-Expected output:
-
-```shell
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100   138  100   138    0     0    831      0 --:--:-- --:--:-- --:--:--   836
-100    64  100    64    0     0    219      0 --:--:-- --:--:-- --:--:--   219
 ```
 
 3. Validate the kubectl binary with the checksum file
@@ -86,3 +68,5 @@ E1017 21:31:38.480359    1921 memcache.go:265] couldn't get current server API g
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 The connection to the server localhost:8080 was refused - did you specify the right host or port?
 ```
+
+(Again - this is expexted to fail)

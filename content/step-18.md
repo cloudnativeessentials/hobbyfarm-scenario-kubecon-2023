@@ -20,15 +20,9 @@ helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
 helm repo update
 ```
 
-Expected output:
+Expected output ends with:
 
 ```shell
-"gatekeeper" has been added to your repositories
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "gatekeeper" chart repository
-...Successfully got an update from the "fluent" chart repository
-...Successfully got an update from the "elastic" chart repository
-...Successfully got an update from the "prometheus-community" chart repository
 Update Complete. ⎈Happy Helming!⎈
 ```
 
@@ -114,6 +108,8 @@ spec:
     labels: ["owner"]
 EOF
 ```
+
+Expected output:
 
 ```shell
 k8srequiredlabels.constraints.gatekeeper.sh/ns-must-have-owner created
