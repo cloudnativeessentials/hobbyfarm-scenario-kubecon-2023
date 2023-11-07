@@ -33,7 +33,7 @@ e51777ae0bce: Pushed
 0.1: digest: sha256:593fca85b1a7782af61eaf78cdea99fabeebcb23d8f64fce5d91f77b120d25c8 size: 2622
 ```
 
-3. Go to the Harbor instance and select the cloudnativeessentials project to verify the container image is present
+3. Go to the Harbor instance and select the `cloudnativeessentials` project to verify the container image is present
 
 
 ## Pull and run your container image from Harbor

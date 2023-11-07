@@ -69,4 +69,4 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 The connection to the server localhost:8080 was refused - did you specify the right host or port?
 ```
 
-(Again - this is expexted to fail)
+(Again - this is expected to fail)
