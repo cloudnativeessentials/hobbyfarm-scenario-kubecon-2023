@@ -90,9 +90,10 @@ When you see:
 ```shell
 http: 2023/MM/DD HH:MM:SS Server is starting...
 ```
+
+
 7. Open a browser to test the application
 <a href="http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080" target="_blank">http://harbor.${vminfo:harbor:public_ip}.sslip.io:8080</a>.
 
+
 8. Stop the program from running with ctrl+c
-
-

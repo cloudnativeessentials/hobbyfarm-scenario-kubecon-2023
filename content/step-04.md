@@ -3,18 +3,15 @@ title = "Containerize an Application: Creating a Container Image"
 weight = 4
 +++
 
-Now we have a simple application, let's containerize it using Docker tools.
-
-The `docker build` command creates container images using a Dockerfile.
-
-A Dockerfile is a text file with the commands to assemble a container image with a format of `INSTRUCTION argument`.
-
+Now we have a simple application, let's containerize it using Docker tools. The `docker build` command creates container images using a Dockerfile.
+A Dockerfile is a text file with the commands to assemble a container image with a format of `INSTRUCTION argument`. 
 Each Dockerfile starts with the `FROM` instruction for the base container image to base the container image from.
+
+<br/>
 
 1. Create a Dockerfile for the `simple-app`.
 
 ```file:dockerfile:~/simple-app/Dockerfile:harbor
-cat <<EOF > ~/simple-app/Dockerfile
 FROM golang:1.21-alpine3.17
 LABEL project=cloudnativeessentials
 WORKDIR /app
@@ -36,6 +33,8 @@ A significant amount of output should appear. When the process has completed you
 ```shell
  => => naming to docker.io/library/simple-app:0.1                                                                                                  0.0s
 ```
+
+<br/>
 
 3. Check if the container image is available locally.
 

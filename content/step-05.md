@@ -3,11 +3,11 @@ title = "Install Harbor"
 weight = 5
 +++
 
-# Harbor Installation
-
-## Prerequisites: Docker Compose and Docker Insecure Registry
+### Prerequisites: Docker Compose and Docker Insecure Registry
 
 You installed Docker in a previous step.
+
+<br/>
 
 1. Docker Compose is a tool to run a multi-container application. The Harbor installer uses a Docker Compose file to start Harbor. 
 
@@ -16,6 +16,8 @@ Install Docker Compose:
 ```ctr:harbor
 sudo apt install docker-compose -y
 ```
+
+<br/>
 
 2. In following steps, we will setup Harbor to use http and not https. Docker requires configuration to use insecure registries.
 
@@ -30,6 +32,8 @@ sudo tee /etc/docker/daemon.json &>/dev/null <<EOF
 }
 EOF
 ```
+
+<br/>
 
 3. Restart Docker
 
@@ -51,6 +55,8 @@ Expected output ends with:
 2023-10-12 18:58:00 (33.7 MB/s) - ‘harbor-online-installer-v2.7.3.tgz’ saved [11087/11087]
 ```
 
+<br/>
+
 5. Download the asc file
 
 ```ctr:harbor
@@ -63,6 +69,8 @@ Expected output ends with:
 2023-10-12 18:58:31 (46.2 MB/s) - ‘harbor-online-installer-v2.7.3.tgz.asc’ saved [833/833]
 ```
 
+<br/>
+
 6. Obtain the public key for the `asc` file
 
 ```ctr:harbor
@@ -74,6 +82,8 @@ Expected output ends with:
 ```shell
 gpg:               imported: 1
 ```
+
+<br/>
 
 7. Verify the genuity of the package
 
@@ -88,6 +98,8 @@ Expected output ends with:
 ```shell
 gpg: binary signature, digest algorithm SHA512, key algorithm rsa4096
 ```
+
+<br/>
 
 8. Extract the installer package
 
@@ -140,6 +152,8 @@ docker ps
 
 The expected output from this command is a text table showing all containers running on the node. 
 The containers shown should all have "Up xx seconds" or "Up xx minutes" as their status.
+
+</br/>
 
 13. Log into Harbor from the Docker client
 
