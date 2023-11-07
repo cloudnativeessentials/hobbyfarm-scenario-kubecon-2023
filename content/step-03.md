@@ -51,8 +51,7 @@ mkdir -p ~/simple-app
 
 Create the simple golang application source.
 
-```ctr:harbor
-cat <<EOF > ~/simple-app/main.go
+```file:go:~/simple-app/main.go:harbor
 package main
 
 import (
@@ -78,7 +77,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hostname is " + hostname)
 }
 
-EOF
 ```
 
 6. Test the application.

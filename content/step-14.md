@@ -78,9 +78,12 @@ This time you will use a Kubernetes manifest to deploy a Deployment.
 
 This time give the `app=nginx` labels to the Deployment and Pods of the Deployment so we can group and identify the Pods in a later step.
 
+First, create a directory to place these manifests:
 ```ctr:kubernetes
 mkdir -p ~/manifests
-cat <<EOF > ~/manifests/deployment.yaml
+```
+
+```file:yaml:~/manifests/deployment.yaml:kubernetes
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -103,7 +106,6 @@ spec:
         image: nginx:1.25.3
         ports:
         - containerPort: 80
-EOF
 ```
 
 7. Use `kubectl apply` to apply the configuration from the deployment.yaml manifest.
@@ -151,8 +153,7 @@ Expose the Pods of the nginx Deployment to be reachable with your browser.
 
 10. Create a manifest for a Service that uses the Pod's label in the `my-namespace` namespace.
 
-```ctr:kubernetes
-cat <<EOF > ~/manifests/service.yaml
+```file:yaml:~/manifests/service.yaml:kubernetes
 apiVersion: v1
 kind: Service
 metadata:
@@ -165,7 +166,6 @@ spec:
   ports:
     - port: 80
       nodePort: 30000
-EOF
 ```
 
 11. Apply the service.yaml manifest to create the Service.

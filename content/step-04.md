@@ -13,7 +13,7 @@ Each Dockerfile starts with the `FROM` instruction for the base container image 
 
 1. Create a Dockerfile for the `simple-app`.
 
-```ctr:harbor
+```file:dockerfile:~/simple-app/Dockerfile:harbor
 cat <<EOF > ~/simple-app/Dockerfile
 FROM golang:1.21-alpine3.17
 LABEL project=cloudnativeessentials
@@ -23,7 +23,6 @@ RUN go mod init simple-app
 RUN go build -o /simple-app
 EXPOSE 8080
 CMD [ "/simple-app" ]
-EOF
 ```
 
 2. Use `docker build` to create the simple-app:0.1 container image.

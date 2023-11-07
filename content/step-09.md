@@ -10,9 +10,9 @@ CNI plugins are required to implement the Kubernetes network model.
 1. Install CNI plugins.
 
 ```ctr:kubernetes
-CNI_PLUGINS_VERSION="v1.3.0"
-ARCH="amd64"
-DEST="/opt/cni/bin"
+export CNI_PLUGINS_VERSION="v1.3.0"
+export ARCH="amd64"
+export DEST="/opt/cni/bin"
 ```
 
 ```ctr:kubernetes

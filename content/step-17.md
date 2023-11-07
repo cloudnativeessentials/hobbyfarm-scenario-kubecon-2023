@@ -1,303 +1,152 @@
 +++
-title = "Observability: Logging"
-weight = 17
+title = "Policy: OPA and Gatekeeper"
+weight = 18
 +++
 
-# Logging
+## Open Policy Agent and Gatekeeper
 
-You can gather logs from containers with the `kubectl -n <namespace> logs <pod name> -c <container name if multiple containers in pod>` command.
+Open Policy Agent (OPA) is a policy engine with policy-as-code and a CNCF graduated project.
+OPA is used to enforce policies in cloud native environments.
 
-An application may use multiple containers and it'll be difficult to obtain logs through single containers.
-A tool to collect logs of an application will simplify log collection.
+OPA Gatekeeper is a customizable admission webhook that enforces policies executed by OPA. 
+With Gatekeeper, users can customize admission control configuration easier.
 
-Fluentd is an open source log aggregator, collector, processor written in Ruby and is a CNCF graduated project.
+With OPA Gatekeeper, you can enforce policies like container images must be pulled from a specific container registry or not allow privilege escalation in containers.
 
-Fluent Bit is an open source log aggregator, collector, processor, forwarder written in C. Fluent Bit is a CNCF graduated sub-project under the umbrella of Fluentd.
-
-Both Fluentd and Fluent Bit use plugins to integrate with data sources and data outputs.
-
-Fluent Bit excels in highly distributed environment and has a smaller footprint than FluentD ~450kb vs ~40MB of memory. Both were developed by Treasure Data.
-
-Fluent Bit is not as flexible as Fluentd. Fluent Bit has about 45 plugins versus Fluentd has about 700 plugins.
-
-For this tutorial, we'll use Fluentd to collect logs
-
-## Install Elasticsearch, Logstash, and Kibana 
-
-We will first install Elasticsearch, Logstash, and Kibana aka the ELK stack as the logging backend for fluentd to send logs to.
-
-We will install the following:
-  - Elasticsearch which is a search/analytics engine and a log analytics tool
-  - Logstash to collect logs and send to Elasticsearch for storage and analysis
-  - Kibana to visualize the data stored in Elasticsearch
-
-1. Add the elastic helm repo.
+1. Add the Gatekeeper helm repo.
 
 ```ctr:kubernetes
-helm repo add elastic https://helm.elastic.co
+helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
 helm repo update
 ```
 
-Expected output:
+Expected output ends with:
 
 ```shell
-"elastic" has been added to your repositories
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "fluent" chart repository
-...Successfully got an update from the "elastic" chart repository
-...Successfully got an update from the "prometheus-community" chart repository
 Update Complete. ⎈Happy Helming!⎈
 ```
 
-
-2. Install Elasticsearch.
+2. Install Gatekeeper.
 
 ```ctr:kubernetes
-helm install elasticsearch elastic/elasticsearch --set replicas=1 --set minimumMasterNodes=1 --set secret.password=changeme --set resources.requests.cpu=100m --set resources.requests.memory=100Mi --set persistence.enabled=false -n elk --create-namespace
+helm install gatekeeper/gatekeeper --name-template=gatekeeper --namespace gatekeeper-system --create-namespace
 ```
 
 Expected output:
 
 ```shell
-NAME: elasticsearch
-LAST DEPLOYED: Thu Nov  2 04:28:58 2023
-NAMESPACE: elk
-STATUS: deployed
-REVISION: 1
-NOTES:
-1. Watch all cluster members come up.
-  $ kubectl get pods --namespace=elk -l app=elasticsearch-master -w
-2. Retrieve elastic user's password.
-  $ kubectl get secrets --namespace=elk elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
-3. Test cluster health using Helm test.
-  $ helm --namespace=elk test elasticsearch
-```
-
-Elasticsearch will take a few minutes to be at a `ready` state/
-You can check the status of the Elasticsearch pod with `kubectl get pods`
-```ctr:kubernetes
-kubectl get pods -n elk
-```
-
-Expected output:
-```shell
-NAME                     READY   STATUS    RESTARTS   AGE
-elasticsearch-master-0   1/1     Running   0          2m19s
-```
-
-Wait until the `elasticsearch-master-0` is ready before proceeding.
-
-3. Install Logstash
-
-```ctr:kubernetes
-helm install logstash elastic/logstash -n elk
-```
-
-Expected output:
-
-```shell
-NAME: logstash
-LAST DEPLOYED: Thu Nov  2 05:42:26 2023
-NAMESPACE: elk
+NAME: gatekeeper
+LAST DEPLOYED: Mon Nov  6 03:51:16 2023
+NAMESPACE: gatekeeper-system
 STATUS: deployed
 REVISION: 1
 TEST SUITE: None
-NOTES:
-1. Watch all cluster members come up.
-  $ kubectl get pods --namespace=elk -l app=logstash-logstash -w
 ```
 
-Wait until the logstash Pod is ready before proceeding.
+## Constraint Framework
+
+A Constraint is the declaration of a policy. For example, if you require each resource in a specific namespace requires a `key` label.
+
+Before you can use Constraints, you must have a Constraint Template. The Constraint Template defines the input parameters and the rego that defines and enforces a policy.
+
+3. Create a Constraint Template that requires an `app` label.
 
 ```ctr:kubernetes
-kubectl get pods --namespace=elk -l app=logstash-logstash
-```
-
-Expected output:
-```shell
-NAME                  READY   STATUS    RESTARTS   AGE
-logstash-logstash-0   1/1     Running   0          94s
-```
-
-4. Install Kibana.
-
-```ctr:kubernetes
-helm install kibana elastic/kibana --set resources.requests.cpu=100m --set resources.requests.memory=100Mi --set service.type=NodePort --set service.nodePort=30001 -n elk
-```
-
-Expected output:
-
-```shell
-NAME: kibana
-LAST DEPLOYED: Thu Nov  2 05:48:14 2023
-NAMESPACE: elk
-STATUS: deployed
-REVISION: 1
-TEST SUITE: None
-NOTES:
-1. Watch all containers come up.
-  $ kubectl get pods --namespace=elk -l release=kibana -w
-2. Retrieve the elastic user's password.
-  $ kubectl get secrets --namespace=elk elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
-3. Retrieve the kibana service account token.
-  $ kubectl get secrets --namespace=elk kibana-kibana-es-token -ojsonpath='{.data.token}' | base64 -d
-```
-
-Wait until the kibana Pod is ready before proceeding
-
-```ctr:kubernetes
-kubectl get pods -n elk -l app=kibana
-```
-
-Expected output:
-
-```shell
-NAME                             READY   STATUS    RESTARTS   AGE
-kibana-kibana-6888db469c-djkv7   1/1     Running   0          111s
-```
-
-Use your browser to access Kibana
-<a href="https://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30001" target="_blank">https://kubernetes.${vminfo:kubernetes:public_ip}.sslip.io:30001</a>
-
-Login in with the username = `elastic`, password = `changeme`
-
-
-## fluentd 
-
-5. Create the required ServiceAccount, ClusterRole, ClusterRoleBinding for fluentd.
-
-```ctr:kubernetes
-cat <<EOF > ~/manifests/fluentd-rbac.yaml
-apiVersion: v1
-kind: ServiceAccount
+cat <<EOF | kubectl apply -f -
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
 metadata:
-  name: fluentd
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: fluentd
-  namespace: kube-system
-rules:
-- apiGroups: [""]
-  resources:
-  - pods
-  - namespaces
-  verbs:
-  - get
-  - list
-  - watch
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: fluentd
-roleRef:
-  kind: ClusterRole
-  name: fluentd
-  apiGroup: rbac.authorization.k8s.io
-subjects:
-- kind: ServiceAccount
-  name: fluentd
-  namespace: kube-system
-EOF
-```
-
-6. Apply the manifest.
-
-```ctr:kubernetes
-kubectl apply -f ~/manifests/fluentd-rbac.yaml
-```
-
-Expected output:
-
-```shell
-serviceaccount/fluentd created
-clusterrole.rbac.authorization.k8s.io/fluentd created
-clusterrolebinding.rbac.authorization.k8s.io/fluentd created
-```
-
-
-7. Create the manifest for the fluentd DaemonSet.
-
-```ctr:kubernetes
-cat <<EOF > ~/manifests/fluentd-ds.yaml
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: fluentd
-  namespace: kube-system
-  labels:
-    k8s-app: fluentd-logging
-    version: v1
+  name: k8srequiredlabels
 spec:
-  selector:
-    matchLabels:
-      k8s-app: fluentd-logging
-      version: v1
-  template:
-    metadata:
-      labels:
-        k8s-app: fluentd-logging
-        version: v1
+  crd:
     spec:
-      serviceAccount: fluentd
-      serviceAccountName: fluentd
-      tolerations:
-      - key: node-role.kubernetes.io/master
-        effect: NoSchedule
-      containers:
-      - name: fluentd
-        image: fluent/fluentd-kubernetes-daemonset:elasticsearch
-        env:
-        - name:  FLUENT_ELASTICSEARCH_HOST
-          value: "elasticsearch-master.elk.svc.cluster.local"
-        - name:  FLUENT_ELASTICSEARCH_PORT
-          value: "9200"
-        - name: FLUENT_ELASTICSEARCH_SCHEME
-          value: "http"
-        - name: FLUENT_UID
-          value: "0"
-        # X-Pack Authentication
-        # =====================
-        - name: FLUENT_ELASTICSEARCH_USER
-          value: "elastic"
-        - name: FLUENT_ELASTICSEARCH_PASSWORD
-          value: "changeme"
-        resources:
-          limits:
-            memory: 200Mi
-          requests:
-            cpu: 100m
-            memory: 200Mi
-        volumeMounts:
-        - name: varlog
-          mountPath: /var/log
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-      terminationGracePeriodSeconds: 30
-      volumes:
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
+      names:
+        kind: K8sRequiredLabels
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredlabels
+
+        violation[{"msg": msg, "details": {"missing_labels": missing}}] {
+          provided := {label | input.review.object.metadata.labels[label]}
+          required := {label | label := input.parameters.labels[_]}
+          missing := required - provided
+          count(missing) > 0
+          msg := sprintf("you must provide labels: %v", [missing])
+        }
 EOF
-```
-
-8. Apply the manifest.
-
-```ctr:kubernetes
-kubectl apply -f ~/manifests/fluentd-ds.yaml
 ```
 
 Expected output:
 
 ```shell
-daemonset.apps/fluentd created
+constrainttemplate.templates.gatekeeper.sh/k8srequiredlabels created
 ```
 
-9. Navigate to the kibana UI > Management > Index Management to see a new Logstash index generated by the fluentd DaemonSet.
+4. Create a Constraint that enforces the ConstraintTemplate to require a label. Specify this policy for Namespaces with the label `owner`. Note this is a dry-run.
+
+```ctr:kubernetes
+cat <<EOF | kubectl apply -f -
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: ns-must-have-owner
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Namespace"]
+  parameters:
+    labels: ["owner"]
+EOF
+```
+
+Expected output:
+
+```shell
+k8srequiredlabels.constraints.gatekeeper.sh/ns-must-have-owner created
+```
+
+5. Test the Constraint.
+
+```ctr:kubernetes
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: new-namespace
+  labels:
+    owner: you
+EOF
+```
+
+Expected output:
+
+```shell
+namespace/new-namespace created
+```
+
+6. Test the Constraint with a Namespace without an `owner` label.
+
+```ctr:kubernetes
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rejected-namespace
+EOF
+```
+
+Expected output:
+
+```shell
+Error from server (Forbidden): error when creating "STDIN": admission webhook "validation.gatekeeper.sh" denied the request: [ns-must-have-owner] you must provide labels: {"owner"}
+```
