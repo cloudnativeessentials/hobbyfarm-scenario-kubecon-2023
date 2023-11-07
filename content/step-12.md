@@ -46,8 +46,8 @@ kubeadm join 172.31.42.53:6443 --token 0cy7s2.w9tjwwg2qdryn4aa \
 The kubeconfig file contains how you will authenticate to the kubernetes cluster.
 
 ```ctr:kubernetes
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+mkdir -p $HOME/.kube && \
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && \
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
